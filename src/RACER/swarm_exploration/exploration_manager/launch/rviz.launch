@@ -1,0 +1,5 @@
+<launch>
+  <arg name="rviz_config" default="$(find exploration_manager)/config/swarm.rviz"/>
+  <param name="use_sim_time" value="true"/>
+  <node name="rvizvisualisation" pkg="rviz" type="rviz" output="log" args="-d $(arg rviz_config)" />
+</launch>

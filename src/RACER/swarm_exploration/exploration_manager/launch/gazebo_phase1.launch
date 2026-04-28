@@ -1,0 +1,110 @@
+<?xml version="1.0"?>
+<!--
+  One-command Phase 1 Gazebo MVP:
+  MAP1.world + 1-4 iris UAVs + rotors Lee controllers + hover commands.
+
+  Usage:
+    roslaunch exploration_manager gazebo_phase1.launch drone_num:=2
+    roslaunch exploration_manager gazebo_phase1.launch drone_num:=4
+-->
+<launch>
+  <arg name="world_name" default="MAP1"/>
+  <arg name="gui"        default="true"/>
+  <arg name="paused"     default="true"/>
+  <arg name="verbose"    default="true"/>
+
+  <arg name="drone_num" default="2"/>
+  <arg name="mav_name"  default="iris"/>
+
+  <arg name="namespace_1" default="$(arg mav_name)_1"/>
+  <arg name="namespace_2" default="$(arg mav_name)_2"/>
+  <arg name="namespace_3" default="$(arg mav_name)_3"/>
+  <arg name="namespace_4" default="$(arg mav_name)_4"/>
+
+  <!-- MAP1 has walls near the origin; these defaults place a small swarm in free space. -->
+  <arg name="x_1" default="-9.0"/>
+  <arg name="y_1" default="-4.5"/>
+  <arg name="z_1" default="0.1"/>
+  <arg name="x_2" default="-9.0"/>
+  <arg name="y_2" default="-2.8"/>
+  <arg name="z_2" default="0.1"/>
+  <arg name="x_3" default="-7.3"/>
+  <arg name="y_3" default="-4.5"/>
+  <arg name="z_3" default="0.1"/>
+  <arg name="x_4" default="-7.3"/>
+  <arg name="y_4" default="-2.8"/>
+  <arg name="z_4" default="0.1"/>
+
+  <arg name="start_hover" default="true"/>
+  <arg name="hover_z" default="2.0"/>
+  <arg name="spawn_delay_1" default="45.0"/>
+  <arg name="spawn_delay_2" default="47.0"/>
+  <arg name="spawn_delay_3" default="49.0"/>
+  <arg name="spawn_delay_4" default="51.0"/>
+  <arg name="unpause_delay" default="50.0"/>
+  <arg name="hover_delay" default="55.0"/>
+
+  <include file="$(find exploration_manager)/launch/env_simulation.launch">
+    <arg name="world_name" value="$(arg world_name)"/>
+    <arg name="gui" value="$(arg gui)"/>
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="verbose" value="$(arg verbose)"/>
+  </include>
+
+  <include file="$(find exploration_manager)/launch/uav_simulation.launch">
+    <arg name="mav_name" value="$(arg mav_name)"/>
+    <arg name="namespace" value="$(arg namespace_1)"/>
+    <arg name="x" value="$(arg x_1)"/>
+    <arg name="y" value="$(arg y_1)"/>
+    <arg name="z" value="$(arg z_1)"/>
+    <arg name="start_hover" value="$(arg start_hover)"/>
+    <arg name="unpause" value="true"/>
+    <arg name="relay_to_racer_odom" value="true"/>
+    <arg name="hover_z" value="$(arg hover_z)"/>
+    <arg name="spawn_delay" value="$(arg spawn_delay_1)"/>
+    <arg name="unpause_delay" value="$(arg unpause_delay)"/>
+    <arg name="hover_delay" value="$(arg hover_delay)"/>
+  </include>
+
+  <include file="$(find exploration_manager)/launch/uav_simulation.launch" if="$(eval int(arg('drone_num')) >= 2)">
+    <arg name="mav_name" value="$(arg mav_name)"/>
+    <arg name="namespace" value="$(arg namespace_2)"/>
+    <arg name="x" value="$(arg x_2)"/>
+    <arg name="y" value="$(arg y_2)"/>
+    <arg name="z" value="$(arg z_2)"/>
+    <arg name="start_hover" value="$(arg start_hover)"/>
+    <arg name="unpause" value="false"/>
+    <arg name="relay_to_racer_odom" value="false"/>
+    <arg name="hover_z" value="$(arg hover_z)"/>
+    <arg name="spawn_delay" value="$(arg spawn_delay_2)"/>
+    <arg name="hover_delay" value="$(arg hover_delay)"/>
+  </include>
+
+  <include file="$(find exploration_manager)/launch/uav_simulation.launch" if="$(eval int(arg('drone_num')) >= 3)">
+    <arg name="mav_name" value="$(arg mav_name)"/>
+    <arg name="namespace" value="$(arg namespace_3)"/>
+    <arg name="x" value="$(arg x_3)"/>
+    <arg name="y" value="$(arg y_3)"/>
+    <arg name="z" value="$(arg z_3)"/>
+    <arg name="start_hover" value="$(arg start_hover)"/>
+    <arg name="unpause" value="false"/>
+    <arg name="relay_to_racer_odom" value="false"/>
+    <arg name="hover_z" value="$(arg hover_z)"/>
+    <arg name="spawn_delay" value="$(arg spawn_delay_3)"/>
+    <arg name="hover_delay" value="$(arg hover_delay)"/>
+  </include>
+
+  <include file="$(find exploration_manager)/launch/uav_simulation.launch" if="$(eval int(arg('drone_num')) >= 4)">
+    <arg name="mav_name" value="$(arg mav_name)"/>
+    <arg name="namespace" value="$(arg namespace_4)"/>
+    <arg name="x" value="$(arg x_4)"/>
+    <arg name="y" value="$(arg y_4)"/>
+    <arg name="z" value="$(arg z_4)"/>
+    <arg name="start_hover" value="$(arg start_hover)"/>
+    <arg name="unpause" value="false"/>
+    <arg name="relay_to_racer_odom" value="false"/>
+    <arg name="hover_z" value="$(arg hover_z)"/>
+    <arg name="spawn_delay" value="$(arg spawn_delay_4)"/>
+    <arg name="hover_delay" value="$(arg hover_delay)"/>
+  </include>
+</launch>

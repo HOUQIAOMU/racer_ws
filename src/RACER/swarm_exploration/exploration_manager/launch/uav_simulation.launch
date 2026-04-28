@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+<!--
+  Phase 1 MVP: Spawn one UAV in Gazebo and start the rotors Lee position
+  controller. Optionally start the rotors hovering example so the UAV
+  takes off and hovers at ~1m without any external command.
+
+  Usage:
+    roslaunch exploration_manager uav_simulation.launch                 # spawn iris + hover
+    roslaunch exploration_manager uav_simulation.launch start_hover:=false
+-->
+<launch>
+  <arg name="mav_name"  default="iris"/>
+  <arg name="namespace" default="$(arg mav_name)"/>
+  <arg name="model"     default="$(find rotors_gazebo)/models/rotors_description/urdf/$(arg mav_name)_base.xacro"/>
+
+  <!-- MAP1 has a wall at the origin, so spawn in a free area near the map corner. -->
+  <arg name="x"     default="-9.0"/>
+  <arg name="y"     default="-4.5"/>
+  <arg name="z"     default="0.1"/>
+  <arg name="roll"  default="0.0"/>
+  <arg name="pitch" default="0.0"/>
+  <arg name="yaw"   default="0.0"/>
+
+  <arg name="enable_logging"      default="false"/>
+  <arg name="enable_ground_truth" default="true"/>
+
+  <!--
+    Topic the Lee controller subscribes to for state feedback.
+    The Phase 1 iris xacro publishes ground-truth odometry here; other MAVs
+    can override this arg if they mount odometry_sensor1/odometry.
+  -->
+  <arg name="odometry_topic"   default="ground_truth/odometry"/>
+
+  <arg name="start_hover"   default="true"/>
+  <arg name="unpause"       default="true"/>
+  <arg name="relay_to_racer_odom" default="true"/>
+  <arg name="spawn_delay"   default="0.0"/>
+  <arg name="unpause_delay" default="0.0"/>
+  <arg name="hover_delay"   default="0.0"/>
+  <arg name="hover_z"       default="2.0"/>
+  <arg name="hover_yaw"     default="0.0"/>
+
+  <param name="use_sim_time" value="true"/>
+
+  <group ns="$(arg namespace)">
+    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
+      <arg name="mav_name"            value="$(arg mav_name)"/>
+      <arg name="namespace"           value="$(arg namespace)"/>
+      <arg name="tf_prefix"           value="$(arg namespace)"/>
+      <arg name="model"               value="$(arg model)"/>
+      <arg name="x"                   value="$(arg x)"/>
+      <arg name="y"                   value="$(arg y)"/>
+      <arg name="z"                   value="$(arg z)"/>
+      <arg name="roll"                value="$(arg roll)"/>
+      <arg name="pitch"               value="$(arg pitch)"/>
+      <arg name="yaw"                 value="$(arg yaw)"/>
+      <arg name="enable_logging"      value="$(arg enable_logging)"/>
+      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)"/>
+      <arg name="rotors_description_dir" value="$(find rotors_gazebo)/models/rotors_description"/>
+      <arg name="spawn_delay"         value="$(arg spawn_delay)"/>
+    </include>
+
+    <node name="lee_position_controller_node"
+          pkg="rotors_control"
+          type="lee_position_controller_node"
+          output="screen">
+      <rosparam command="load" file="$(find rotors_gazebo)/resource/lee_controller_$(arg mav_name).yaml"/>
+      <rosparam command="load" file="$(find rotors_gazebo)/resource/$(arg mav_name).yaml"/>
+      <remap from="odometry" to="$(arg odometry_topic)"/>
+    </node>
+
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
+
+    <node if="$(arg start_hover)"
+          name="hovering_example"
+          pkg="rotors_gazebo"
+          type="hovering_example"
+          launch-prefix="bash -c 'sleep $(arg hover_delay); exec &quot;$@&quot;' --"
+          output="screen">
+      <param name="x" value="$(arg x)"/>
+      <param name="y" value="$(arg y)"/>
+      <param name="z" value="$(arg hover_z)"/>
+      <param name="yaw" value="$(arg hover_yaw)"/>
+    </node>
+  </group>
+
+  <!-- Auto-unpause Gazebo so the UAV can actually take off without manual call -->
+  <node if="$(arg unpause)"
+        name="gazebo_unpause"
+        pkg="rosservice"
+        type="rosservice"
+        launch-prefix="bash -c 'sleep $(arg unpause_delay); exec &quot;$@&quot;' --"
+        args="call --wait /gazebo/unpause_physics {}"
+        output="screen"/>
+
+  <!-- Minimal-cost odom bridge so Racer-style nodes can subscribe to /state_ukf/odom -->
+  <node if="$(arg relay_to_racer_odom)"
+        name="gazebo_odom_to_racer"
+        pkg="topic_tools"
+        type="relay"
+        args="/$(arg namespace)/$(arg odometry_topic) /state_ukf/odom"
+        output="log"/>
+</launch>
