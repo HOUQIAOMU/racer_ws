@@ -1,0 +1,8 @@
+prefix=/home/jacob/racer_ws/devel
+
+Name: lkh_mtsp_solver
+Description: Description of lkh_mtsp_solver
+Version: 0.0.0
+Cflags: -I/home/jacob/racer_ws/devel/include -I/home/jacob/racer_ws/src/RACER/swarm_exploration/utils/lkh_mtsp_solver/include
+Libs: -L${prefix}/lib -llkh_mtsp_solver
+Requires: roscpp

@@ -1,0 +1,8 @@
+prefix=/home/jacob/racer_ws/devel
+
+Name: poly_traj
+Description: Description of poly_traj
+Version: 0.0.0
+Cflags: -I/home/jacob/racer_ws/src/RACER/swarm_exploration/poly_traj/include
+Libs: -L${prefix}/lib -lpoly_traj
+Requires: 
