@@ -1,1050 +1,682 @@
-# Phase 1：最小可运行闭环（重点详细写）
+# Phase 2 多 UAV Racer-Gazebo 完整仿真方案
 
-## 1. 当前状态评估
+## 现状确认摘要
 
-### 已复制 3 个包的作用
+### xacro 文件路径
 
-- `src/RACER/swarm_exploration/rotors_simulator`
-  - 核心 Gazebo Classic 多旋翼仿真框架。
-  - 主要子包：
-    - `rotors_gazebo`：world、模型、示例 launch、hover/waypoint 示例节点。
-    - `rotors_gazebo_plugins`：Gazebo 插件，包括 motor model、IMU、odometry、controller interface、ROS interface。
-    - `rotors_description`：UAV xacro/urdf 模型与 rotor plugin 配置。
-    - `rotors_control`：Lee position controller / attitude-rate controller，将轨迹或姿态命令转换为电机角速度。
-    - `rotors_comm`：rotors 相关消息。
-- `src/RACER/swarm_exploration/fuae_gazebo`
-  - 从 Star-Searcher 迁移来的 Gazebo 资源包。
-  - 当前包含：
-    - `launch/spawn_mav.launch`：基于 `rotors_description` xacro 调用 `gazebo_ros/spawn_model`。
-    - `worlds/MAP1.world`、`worlds/MAP2.world`：带静态结构的 Gazebo world。
-    - `resource/*.yaml`：iris/ardrone 及 Lee controller 参数。
-  - Phase 1 只允许作为 world/spawn 参考；不接入传感器。
-- `src/RACER/swarm_exploration/gazebo_map_generator`
-  - Gazebo 场景/地图生成相关包。
-  - Phase 1 明确禁用，不作为 MVP 依赖，避免把“world 能加载、UAV 能动”的闭环复杂化。
+从指定命令读取到的 UAV/rotors 相关 xacro 路径如下，Phase 2 只基于这些真实路径规划修改：
 
-### Racer 当前已有仿真/控制状态
+- `src/RACER/swarm_exploration/rotors_simulator/rotors_gazebo/models/rotors_description/urdf/iris_base.xacro`
+- `src/RACER/swarm_exploration/rotors_simulator/rotors_gazebo/models/rotors_description/urdf/iris.xacro`
+- `src/RACER/swarm_exploration/rotors_simulator/rotors_gazebo/models/rotors_description/urdf/component_snippets.xacro`
+- `src/RACER/swarm_exploration/rotors_simulator/rotors_gazebo/models/rotors_description/urdf/multirotor_base.xacro`
+- `src/RACER/swarm_exploration/rotors_simulator/rotors_description/urdf/ardrone.xacro`
+- `src/RACER/swarm_exploration/rotors_simulator/rotors_description/urdf/ardrone_base.xacro`
+- `src/RACER/swarm_exploration/rotors_simulator/rotors_description/urdf/component_snippets.xacro`
+- `src/RACER/swarm_exploration/rotors_simulator/rotors_description/urdf/multirotor_base.xacro`
+- `src/RACER/swarm_exploration/rotors_simulator/rotors_description/urdf/VLP-16.urdf.xacro`
 
-- Racer 原始仿真不依赖 Gazebo：
-  - `uav_simulator/so3_quadrotor_simulator/launch/simulator.launch`
-  - `swarm_exploration/plan_manage/launch/simulator.xml`
-  - `swarm_exploration/exploration_manager/launch/simulator_light.xml`
-- Racer 当前控制链路：
-  - `plan_manage/src/traj_server.cpp`
-    - 订阅 `/odom_world`
-    - 发布 `/position_cmd`，消息类型为 `quadrotor_msgs/PositionCommand`
-  - `exploration_manager/launch/single_drone_exploration.xml`
-    - 将 `/position_cmd` remap 到 `planning/pos_cmd_$(arg drone_id)`
-    - 将 `/odom_world` remap 到 `$(arg odom_prefix)_$(arg drone_id)`，默认整体 odom 前缀在 `swarm_exploration.launch` 中是 `/state_ukf/odom`
-  - `uav_simulator/so3_control/src/so3_control_nodelet.cpp`
-    - 私有订阅 `~odom`、`~position_cmd`、`~imu`
-    - 私有发布 `~so3_cmd`
-  - `uav_simulator/poscmd_2_odom/src/poscmd_2_odom.cpp`
-    - 私有订阅 `~command`
-    - 私有发布 `~odometry`
-  - 现有轻量仿真 `simulator_light.xml` 用 `poscmd_2_odom` 将 `/planning/pos_cmd_<id>` 直接转成 odom，是“运动学假闭环”，不是 Gazebo 物理闭环。
+本方案使用当前 Phase 1 已在 Gazebo 中工作的 `iris` 模型，即修改 `src/RACER/swarm_exploration/rotors_simulator/rotors_gazebo/models/rotors_description/urdf/iris_base.xacro`，并复用同目录 `component_snippets.xacro` 中已有的传感器宏。
 
-### Gazebo/rotors 当前输出与控制接口
+### spawn 机制
 
-- `rotors_gazebo/launch/mav_hovering_example.launch`
-  - 启动 Gazebo world。
-  - spawn UAV。
-  - 启动 `rotors_control/lee_position_controller_node`。
-  - 启动 `rotors_gazebo/hovering_example`。
-- rotors 控制输入：
-  - `rotors_control/src/nodes/lee_position_controller_node.cpp`
-    - 订阅 `command/pose`
-    - 订阅 `command/trajectory`
-    - 订阅 `odometry`
-    - 发布 `command/motor_speed`
-  - 在 UAV namespace 为 `iris` 时，对应 topic 通常为：
-    - `/iris/command/trajectory`
-    - `/iris/command/pose`
-    - `/iris/odometry_sensor1/odometry`
-    - `/iris/command/motor_speed`
-- Gazebo 插件输出：
-  - `rotors_description/urdf/component_snippets.xacro`
-    - IMU plugin 发布 `imu` 或 `ground_truth/imu`
-    - odometry plugin 发布 `odometry`
-  - `rotors_description/urdf/multirotor_base.xacro`
-    - 每个 rotor 的 `librotors_gazebo_motor_model.so` 订阅 `gazebo/command/motor_speed`
-    - controller interface 将 `command/motor_speed` 转发到 `gazebo/command/motor_speed`
-- 关键差异：
-  - Racer planner 输出 `quadrotor_msgs/PositionCommand`。
-  - rotors Lee controller 输入 `trajectory_msgs/MultiDOFJointTrajectory` 或 `geometry_msgs/PoseStamped`。
-  - Phase 1 最小代价不直接接 Racer planner；先用 rotors 自带 hover/trajectory 控制验证 Gazebo 物理闭环。
+当前实际 spawn 链路：
 
-### 当前缺失组件（必须具体）
+- `src/RACER/swarm_exploration/exploration_manager/launch/uav_exploration.launch`
+  - include `src/RACER/swarm_exploration/exploration_manager/launch/gazebo_phase1.launch`
+  - 启动 `world_cloud_publisher.py`
+  - 可选 include `src/RACER/swarm_exploration/exploration_manager/launch/rviz.launch`
+- `src/RACER/swarm_exploration/exploration_manager/launch/gazebo_phase1.launch`
+  - 当前默认 `drone_num=4`
+  - 当前 namespace 是 `iris_1`、`iris_2`、`iris_3`、`iris_4`
+  - 逐架 include `src/RACER/swarm_exploration/exploration_manager/launch/uav_simulation.launch`
+- `src/RACER/swarm_exploration/exploration_manager/launch/uav_simulation.launch`
+  - 在 `<group ns="$(arg namespace)">` 内 include `$(find rotors_gazebo)/launch/spawn_mav.launch`
+  - 启动 `rotors_control/lee_position_controller_node`
+  - 启动 `robot_state_publisher`、`joint_state_publisher`
+  - 可选启动 `rotors_gazebo/hovering_example`
+  - 可选启动 `odom_visualization`
+- `src/RACER/swarm_exploration/fuae_gazebo/launch/spawn_mav.launch`
+  - 使用 `xacro` 生成 `robot_description`
+  - 通过 `gazebo_ros/spawn_model` 以 `-model $(arg namespace)` 生成模型
 
-- 缺少面向 Racer 的 Gazebo MVP launch：
-  - 当前不存在 `src/RACER/swarm_exploration/exploration_manager/launch/env_simulation.launch`
-  - 当前不存在 `src/RACER/swarm_exploration/exploration_manager/launch/uav_simulation.launch`
-- 缺少明确的 MVP world 选择：
-  - Phase 1 应优先使用 `rotors_gazebo/worlds/basic.world`，或复制成 `fuae_gazebo/worlds/racer_mvp.world` 后只保留 ground、sun、少量静态障碍。
-  - 暂不使用 `gazebo_map_generator`。
-- 缺少 Racer topic 与 rotors topic 的最小桥接策略：
-  - Gazebo odom：`/iris/odometry_sensor1/odometry` 或 `/iris/ground_truth/odometry`
-  - Racer 常用 odom：`/state_ukf/odom`、`/visual_slam/odom`、多机时 `/state_ukf/odom_<id>`
-  - Phase 1 只需要 remap/relay odom 到 RViz 或轻量验证节点，不修改 Racer 核心算法。
-- 可能缺少系统/ROS 依赖：
-  - `gazebo_ros`
-  - `gazebo_plugins`
-  - `xacro`
-  - `mav_msgs`
-  - `mavros`
-  - `octomap`
-  - `octomap_ros`
-  - `cv_bridge`
-  - `cmake_modules`
-  - `protobuf-dev`
-  - `libgoogle-glog-dev`
-  - `yaml-cpp`
-  - `joint_state_publisher`
+Phase 2 的统一入口需要新增 `src/RACER/swarm_exploration/exploration_manager/launch/searchmap1.launch`，在该入口中把 namespace 从当前 `iris_1~4` 切换为工程约束要求的 `/uav0~3`。
+
+### Racer 订阅 topic
+
+原始指定命令 `grep -r ... src/racer/` 返回 `src/racer/: No such file or directory`，真实 Racer 相关代码在 `src/RACER/swarm_exploration`。根据实际文件读取：
+
+- `src/RACER/swarm_exploration/exploration_manager/launch/single_drone_planner.xml`
+  - `exploration_manager/exploration_node` remap:
+    - `/odom_world` -> `$(arg odometry_topic)`
+    - `/map_ros/pose` -> `$(arg sensor_pose_topic)`
+    - `/map_ros/depth` -> `$(arg depth_topic)`
+    - `/map_ros/cloud` -> `$(arg cloud_topic)`
+- `src/RACER/swarm_exploration/exploration_manager/src/fast_exploration_fsm.cpp`
+  - subscribes `/move_base_simple/goal`
+  - subscribes `/odom_world`
+  - subscribes `/swarm_expl/drone_state_recv`
+  - subscribes `/swarm_expl/pair_opt_recv`
+  - subscribes `/swarm_expl/pair_opt_res_recv`
+  - subscribes `/planning/swarm_traj_recv`
+- `src/RACER/swarm_exploration/plan_env/src/map_ros.cpp`
+  - subscribes `/map_ros/depth` as `sensor_msgs/Image`
+  - subscribes `/map_ros/cloud` as `sensor_msgs/PointCloud2`
+  - both are synchronized with `/map_ros/pose` as `geometry_msgs/PoseStamped`
+- `src/RACER/swarm_exploration/plan_manage/src/traj_server.cpp`
+  - subscribes `planning/bspline`
+  - subscribes `planning/replan`
+  - subscribes `planning/new`
+  - subscribes `/odom_world`
+  - subscribes `/loop_fusion/pg_T_vio`
+
+### Racer 发布 topic
+
+根据实际文件读取：
+
+- `src/RACER/swarm_exploration/exploration_manager/src/fast_exploration_fsm.cpp`
+  - publishes `/planning/replan`
+  - publishes `/planning/new`
+  - publishes `/planning/bspline`
+  - publishes `/swarm_expl/drone_state_send`
+  - publishes `/swarm_expl/pair_opt_send`
+  - publishes `/swarm_expl/pair_opt_res_send`
+  - publishes `/planning/swarm_traj_send`
+  - publishes `/swarm_expl/hgrid_send`
+  - publishes `/swarm_expl/grid_tour_send`
+- `src/RACER/swarm_exploration/plan_manage/src/traj_server.cpp`
+  - publishes `/position_cmd` as `quadrotor_msgs/PositionCommand`
+  - publishes `planning/position_cmd_vis`
+  - publishes `planning/travel_traj`
+- `src/RACER/swarm_exploration/plan_env/src/map_ros.cpp`
+  - publishes `/sdf_map/occupancy_all`
+  - publishes `/sdf_map/occupancy_local`
+  - publishes `/sdf_map/occupancy_local_inflate`
+  - publishes `/sdf_map/unknown`
+  - publishes `/sdf_map/esdf`
+  - publishes `/sdf_map/depth_cloud`
+
+### rotors 接收控制 topic
+
+根据实际文件读取：
+
+- `src/RACER/swarm_exploration/rotors_simulator/rotors_control/src/nodes/lee_position_controller_node.cpp`
+  - subscribes `mav_msgs::default_topics::COMMAND_POSE`，注释对应 `command/pose`
+  - subscribes `mav_msgs::default_topics::COMMAND_TRAJECTORY`，注释对应 `command/trajectory`
+  - subscribes `mav_msgs::default_topics::ODOMETRY`，注释对应 `odometry`
+  - publishes `mav_msgs::default_topics::COMMAND_ACTUATORS`，注释对应 `command/motor_speed`
+- `src/RACER/swarm_exploration/rotors_simulator/rotors_gazebo/models/rotors_description/urdf/component_snippets.xacro`
+  - `controller_plugin_macro` 的 Gazebo 接口接收 `/${namespace}/command/motor_speed`
+  - 同插件发布到 Gazebo 内部 `/gazebo/command/motor_speed`
+
+因此最小控制对接方案是新增一个 `quadrotor_msgs/PositionCommand -> trajectory_msgs/MultiDOFJointTrajectory` 桥接节点，把 Racer 的 `/uavN/planning/pos_cmd` 转成 rotors Lee 控制器的 `/uavN/command/trajectory`，不修改 Racer 核心规划代码。
+
+## 1. 系统架构
+
+Phase 2 数据流：
+
+```text
+Gazebo MAP1.world
+  -> /uavN/depth/points 或 /uavN/depth/image
+  -> /uavN/sensor_pose + /uavN/odom + /uavN/imu/data
+  -> /uavN/exploration_node + /uavN/traj_server
+  -> /uavN/planning/pos_cmd
+  -> /uavN/poscmd_to_mav_trajectory
+  -> /uavN/command/trajectory
+  -> /uavN/lee_position_controller_node
+  -> /uavN/command/motor_speed
+  -> rotors Gazebo controller plugin
+  -> UAV motion in Gazebo
+```
+
+全局约束：
+
+- 使用 `/clock`，所有 launch 设置 `use_sim_time=true`。
+- UAV namespace 改为 `/uav0`、`/uav1`、`/uav2`、`/uav3`。
+- 每架 UAV 的规划、传感器、控制 topic 在自身 namespace 内隔离。
+- swarm 协同 topic 保留共享总线，但通过 `single_drone_planner.xml` 的既有 remap 方式汇聚到公共 topic：
+  - `/swarm_expl/drone_state`
+  - `/swarm_expl/pair_opt`
+  - `/swarm_expl/pair_opt_res`
+  - `/planning/swarm_traj`
+  - `/multi_map_manager/chunk_stamps`
+  - `/multi_map_manager/chunk_data`
+- TF 目标链路：
+  - `map -> uavN/odom -> uavN/base_link -> uavN/camera_depth_link -> uavN/camera_depth_optical_center_link`
+  - `uavN/base_link -> uavN/imu_link`
+
+## 2. 传感器集成
+
+### 深度相机
+
+修改文件：
+
+- `src/RACER/swarm_exploration/rotors_simulator/rotors_gazebo/models/rotors_description/urdf/iris_base.xacro`
+- 必要时修正或复用：
+  - `src/RACER/swarm_exploration/rotors_simulator/rotors_gazebo/models/rotors_description/urdf/component_snippets.xacro`
+
+现有可复用插件宏：
+
+- `component_snippets.xacro` 已有 `vi_sensor_depth_macro`
+- 使用插件：`libgazebo_ros_openni_kinect.so`
+- 现有宏输出：
+  - `camera/image_raw`
+  - `camera/camera_info`
+  - `depth/disparity`
+  - `depth/camera_info`
+  - `depth/points`
+
+计划接入方式：
+
+- 在 `iris_base.xacro` 中给每架 `iris` 挂载前向深度相机。
+- 使用 `parent_link="base_link"`。
+- 使用 `camera_suffix="depth"`。
+- 使用 `frame_rate="30.0"`，满足 20-30Hz 要求。
+- 期望 topic：
+  - `/uav0/depth/points`
+  - `/uav1/depth/points`
+  - `/uav2/depth/points`
+  - `/uav3/depth/points`
+  - 同时保留 `/uavN/depth/disparity` 或等价 depth image topic，作为可选输入。
+- Racer 最小对接使用 point cloud：
+  - `/map_ros/cloud` remap 到 `/uavN/depth/points`
+  - 不优先使用 depth image，避免 Gazebo OpenNI depth/disparity 编码与 `map_ros` 的 `k_depth_scaling_factor=1000.0` 不一致。
+
+需要注意：
+
+- `component_snippets.xacro` 中 depth sensor name 和 plugin name 当前写作 `${namespace}_camera_{camera_suffix}`，其中 `{camera_suffix}` 疑似漏 `$`。实现时应修正为 `${namespace}_camera_${camera_suffix}`，否则多机模型中 sensor/plugin 名称可能不唯一。
+- `frameName` 当前是 `camera_${camera_suffix}_optical_center_link`，为了 TF 隔离，建议改成 `${namespace}/camera_${camera_suffix}_optical_center_link` 或确认插件发布的 `frame_id` 与 TF 中 link 名一致。
+
+### IMU
+
+修改文件：
+
+- `src/RACER/swarm_exploration/rotors_simulator/rotors_gazebo/models/rotors_description/urdf/iris_base.xacro`
+
+现状：
+
+- `iris_base.xacro` 已挂载 `imu_plugin_macro`
+- plugin：`librotors_gazebo_imu_plugin.so`
+- 当前真实 IMU topic 参数是 `imu_topic="/imu"`
+- 在 namespace 为 `uavN` 时，实际目标 topic 应为 `/uavN/imu`
+
+计划接入方式：
+
+- 保留现有 rotors IMU 插件，避免重复添加第二套 IMU。
+- 为满足工程约束中的 `/imu/data`，把 `imu_topic` 从 `/imu` 调整为 `imu/data`，使每架 UAV 发布：
+  - `/uav0/imu/data`
+  - `/uav1/imu/data`
+  - `/uav2/imu/data`
+  - `/uav3/imu/data`
+- 若 `controller_plugin_macro` 当前 `imu_sub_topic="imu"` 依赖 `/uavN/imu`，同步改为 `imu_sub_topic="imu/data"`，确保 rotors controller interface 使用同一个 IMU 源。
+- frame：
+  - link：`uavN/imu_link`
+  - message `frame_id` 目标：`uavN/imu_link`
+- 频率：
+  - rotors IMU 插件跟随 Gazebo update，验收用 `rostopic hz /uavN/imu/data` 检查至少 20Hz；若远高于 30Hz，可在后续增加 throttle，但首版不主动降频，避免影响控制。
+
+## 3. 多 UAV 设计
+
+### namespace
+
+Phase 1 当前 namespace 是：
+
+- `iris_1`
+- `iris_2`
+- `iris_3`
+- `iris_4`
+
+Phase 2 改为：
+
+- `uav0`
+- `uav1`
+- `uav2`
+- `uav3`
+
+在 `src/RACER/swarm_exploration/exploration_manager/launch/searchmap1.launch` 中设置：
+
+- `namespace_0=uav0`
+- `namespace_1=uav1`
+- `namespace_2=uav2`
+- `namespace_3=uav3`
+- `drone_id` 传给 Racer 时使用 `1~4`，因为现有 `single_drone_exploration.xml`、`single_drone_planner.xml` 和 swarm 逻辑使用 1-based id。
+- namespace 使用 `uav0~3`，Racer 内部 `drone_id` 使用 `1~4`，两者通过 launch 参数显式映射。
+
+### launch spawn 方式
+
+复用当前已验证的 spawn 链路：
+
+- `searchmap1.launch`
+  - include `env_simulation.launch`
+  - include `uav_simulation.launch` 四次或 include 一个新增的 per-UAV launch 四次
+- `uav_simulation.launch`
+  - include `rotors_gazebo/launch/spawn_mav.launch`
+- `spawn_mav.launch`
+  - xacro -> `robot_description`
+  - `gazebo_ros/spawn_model`
+
+推荐实现：
+
+- 不直接破坏 Phase 1 的 `uav_exploration.launch` 默认行为。
+- 新增 `searchmap1.launch` 作为 Phase 2 统一入口。
+- 为 Phase 2 扩展 `uav_simulation.launch`，新增参数：
+  - `enable_depth_camera`
+  - `enable_racer`
+  - `start_hover` 默认在 Phase 2 为 `false`
+  - `racer_drone_id`
+  - `racer_odom_topic`
+  - `racer_cloud_topic`
+  - `racer_sensor_pose_topic`
+- 或新增更清晰的 `src/RACER/swarm_exploration/exploration_manager/launch/uav_racer_simulation.launch`，内部 include `uav_simulation.launch` 并启动 Racer/桥接节点。
+
+### topic 隔离
+
+每架 UAV 的私有 topic：
+
+- `/uavN/ground_truth/odometry`
+- `/uavN/odom`
+- `/uavN/imu/data`
+- `/uavN/depth/points`
+- `/uavN/depth/disparity` 或 `/uavN/depth/image`
+- `/uavN/sensor_pose`
+- `/uavN/planning/pos_cmd`
+- `/uavN/command/trajectory`
+- `/uavN/command/motor_speed`
+- `/uavN/sdf_map/occupancy_all` 或现有兼容命名 `/sdf_map/occupancy_all_<drone_id>`
+
+Racer 已有多机共享 topic 保持公共：
+
+- `/swarm_expl/drone_state`
+- `/swarm_expl/pair_opt`
+- `/swarm_expl/pair_opt_res`
+- `/planning/swarm_traj`
+- `/multi_map_manager/chunk_stamps`
+- `/multi_map_manager/chunk_data`
+
+## 4. `searchmap1.launch` 核心设计
+
+新增文件：
+
+- `src/RACER/swarm_exploration/exploration_manager/launch/searchmap1.launch`
+
+职责：
+
+- 设置 `use_sim_time=true`
+- 加载 MAP1：
+  - include `src/RACER/swarm_exploration/exploration_manager/launch/env_simulation.launch`
+  - `world_name=MAP1`
+- 发布 MAP1 点云：
+  - 启动 `exploration_manager/world_cloud_publisher.py`
+  - topic `/map_generator/global_cloud`
+  - frame `map` 或 `world`；推荐统一为 `map`
+- spawn 2-4 架 UAV：
+  - 默认 `drone_num=4`
+  - namespace `/uav0~3`
+  - 复用 Phase 1 中已调整的 MAP1 中心安全位置
+- 每架 UAV 启动：
+  - `spawn_mav.launch`
+  - `lee_position_controller_node`
   - `robot_state_publisher`
-- 可能缺少构建层配置：
-  - `rotors_gazebo_plugins` 需要正确链接 Gazebo Classic headers/libs。
-  - copied package 只完成复制，尚未验证 catkin build。
-- 缺少 plugin 加载验证机制：
-  - 需要在运行时检查 `librotors_gazebo_motor_model.so`、`librotors_gazebo_controller_interface.so`、`librotors_gazebo_odometry_plugin.so`、`librotors_gazebo_imu_plugin.so` 是否被 Gazebo 成功加载。
+  - `joint_state_publisher`
+  - TF 辅助节点
+  - sensor pose 发布节点
+  - Racer `single_drone_exploration.xml`
+  - 控制桥接节点
+- 可选启动 RViz：
+  - include `src/RACER/swarm_exploration/exploration_manager/launch/rviz.launch`
 
-## 2. 最小系统架构
-
-Phase 1 只做一个单 UAV Gazebo 物理闭环：
+include 关系：
 
 ```text
-Gazebo world
-  └── gazebo_ros + rotors_gazebo_ros_interface_plugin
-        └── spawn_model 加载 iris/ardrone xacro
-              └── UAV model
-                    ├── multirotor_base_plugin
-                    ├── motor_model plugins
-                    ├── controller_interface plugin
-                    ├── odometry plugin
-                    └── imu plugin
-                          ↓
-                    /iris/odometry_sensor1/odometry
-                    /iris/imu
-                          ↓
-rotors_control/lee_position_controller_node
-  subscribe: /iris/odometry_sensor1/odometry
-  subscribe: /iris/command/trajectory 或 /iris/command/pose
-  publish:   /iris/command/motor_speed
-                          ↓
-controller_interface plugin
-  /iris/command/motor_speed → /iris/gazebo/command/motor_speed
-                          ↓
-motor_model plugins
-  电机力/力矩作用于 Gazebo 物理引擎
-                          ↓
-UAV 起飞/悬停/简单移动
+searchmap1.launch
+  -> env_simulation.launch
+  -> world_cloud_publisher.py
+  -> uav_racer_simulation.launch x drone_num
+       -> uav_simulation.launch
+            -> rotors_gazebo/launch/spawn_mav.launch
+            -> rotors_control/lee_position_controller_node
+       -> single_drone_exploration.xml
+            -> single_drone_planner.xml
+            -> traj_server
+       -> poscmd_to_mav_trajectory
+       -> odom_tf_broadcaster
+       -> sensor_pose_from_tf
+  -> rviz.launch
 ```
 
-必须使用的 package：
-
-- `gazebo_ros`
-  - 启动 Gazebo Classic。
-  - 提供 `/clock`、`/gazebo/*` 服务、`spawn_model`。
-- `rotors_gazebo`
-  - 提供 `basic.world`、示例 launch、`hovering_example`。
-- `rotors_description`
-  - 提供 UAV xacro/urdf，推荐 Phase 1 先使用 `iris`，因为 `rotors_gazebo/models/rotors_description/urdf/iris_base.xacro`、controller yaml 和 world 示例都较完整。
-- `rotors_gazebo_plugins`
-  - 提供 motor、odometry、IMU、controller interface 等 Gazebo 插件。
-- `rotors_control`
-  - 提供 `lee_position_controller_node`，用于从 `command/trajectory` 生成 `command/motor_speed`。
-- `robot_state_publisher`
-  - 发布 UAV TF。
-- `joint_state_publisher`
-  - 提供 joint state，辅助 RViz 模型显示。
-- `exploration_manager`
-  - 作为 Racer 对外统一 launch 入口，只新增/封装 launch，不改核心算法。
-- `odom_visualization` 或 `rviz`
-  - Phase 1 只做状态可视化，不启动感知建图。
-
-Phase 1 明确不使用：
-
-- `gazebo_map_generator`
-- `local_sensing_node/pcl_render_node`
-- realsense
-- velodyne
-- Racer exploration/planning 主算法
-- 多 UAV swarm launch
-
-## 3. 逐步执行步骤（核心）
-
-### Step 0：构建与依赖基线检查
-
-- 做什么（具体操作）
-  - 在 workspace 根目录检查 copied package 是否能被 catkin 识别。
-  - 先只构建 Phase 1 必需包，避免一次性构建全量 Racer 干扰定位。
-- 修改/涉及文件（路径级别）
-  - 暂不修改文件。
-  - 检查：
-    - `src/RACER/swarm_exploration/rotors_simulator/*/package.xml`
-    - `src/RACER/swarm_exploration/fuae_gazebo/package.xml`
-    - `src/RACER/swarm_exploration/exploration_manager/package.xml`
-- 为什么做
-  - 当前 3 个包只是复制，最先要确认缺哪些 ROS/system 依赖。
-  - 插件编译失败会导致后续 spawn 成功但 UAV 不动。
-- 如何验证（必须可执行）
-
-```bash
-cd /home/jacob/racer_ws
-source /opt/ros/$ROS_DISTRO/setup.bash
-catkin_make --pkg rotors_comm rotors_gazebo_plugins rotors_description rotors_control rotors_gazebo fuae_gazebo exploration_manager
-source devel/setup.bash
-rospack find rotors_gazebo
-rospack find rotors_description
-rospack find rotors_control
-rospack find fuae_gazebo
-```
-
-通过标准：
-
-- `catkin_make --pkg ...` 成功。
-- `rospack find` 能找到上述包。
-- `devel/lib` 下存在 rotors Gazebo 插件：
-
-```bash
-ls /home/jacob/racer_ws/devel/lib/librotors_gazebo_*so
-```
-
-### Step 1：Gazebo world 单独启动
-
-- 做什么（具体操作）
-  - 新建 `exploration_manager/launch/env_simulation.launch`。
-  - 只启动 Gazebo world，不 spawn UAV。
-  - Phase 1 推荐先用 `rotors_gazebo/worlds/basic.world`，该 world 已包含：
-    - ground plane
-    - sun
-    - `librotors_gazebo_ros_interface_plugin.so`
-    - ODE physics
-- 修改/涉及文件（路径级别）
-  - 新增：
-    - `src/RACER/swarm_exploration/exploration_manager/launch/env_simulation.launch`
-  - 参考：
-    - `src/RACER/swarm_exploration/rotors_simulator/rotors_gazebo/launch/mav_hovering_example.launch`
-    - `src/RACER/swarm_exploration/rotors_simulator/rotors_gazebo/worlds/basic.world`
-- 为什么做
-  - 先把 world 与 Gazebo ROS 接口跑通，避免同时排查模型、插件、控制器。
-  - 这是最小闭环的第一层。
-- 建议 launch 内容
-
-```xml
-<launch>
-  <arg name="world_name" default="basic"/>
-  <arg name="gui" default="true"/>
-  <arg name="paused" default="true"/>
-  <arg name="debug" default="false"/>
-  <arg name="verbose" default="true"/>
-
-  <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find rotors_gazebo)/models"/>
-  <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find rotors_gazebo)/models"/>
-
-  <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find rotors_gazebo)/worlds/$(arg world_name).world"/>
-    <arg name="gui" value="$(arg gui)"/>
-    <arg name="paused" value="$(arg paused)"/>
-    <arg name="debug" value="$(arg debug)"/>
-    <arg name="verbose" value="$(arg verbose)"/>
-  </include>
-</launch>
-```
-
-- 如何验证（必须可执行）
-
-```bash
-cd /home/jacob/racer_ws
-source devel/setup.bash
-roslaunch exploration_manager env_simulation.launch world_name:=basic paused:=true verbose:=true
-```
-
-另开终端：
-
-```bash
-source /home/jacob/racer_ws/devel/setup.bash
-rostopic echo -n 1 /clock
-rosservice list | grep /gazebo
-```
-
-通过标准：
-
-- Gazebo GUI 打开。
-- world 正常显示 ground plane 和 sun。
-- `/clock` 正常发布。
-- `/gazebo/spawn_urdf_model`、`/gazebo/unpause_physics` 等服务存在。
-- 终端没有 `Failed to load plugin librotors_gazebo_ros_interface_plugin.so`。
-
-### Step 2：加载 rotors 仿真框架
-
-- 做什么（具体操作）
-  - 在 Step 1 的 world launch 基础上确认 rotors model/resource 路径、插件库路径正确。
-  - 确保 `source devel/setup.bash` 后 Gazebo 能找到：
-    - rotors models
-    - rotors worlds
-    - rotors plugins
-- 修改/涉及文件（路径级别）
-  - 检查/必要时补充：
-    - `src/RACER/swarm_exploration/exploration_manager/launch/env_simulation.launch`
-  - 不修改 Racer 核心算法。
-- 为什么做
-  - spawn_model 能加载 URDF 不代表 Gazebo 能加载模型 mesh 和插件。
-  - 如果 `GAZEBO_MODEL_PATH` 或 catkin plugin path 缺失，后续会出现模型不完整、插件未加载。
-- 如何验证（必须可执行）
-
-```bash
-source /home/jacob/racer_ws/devel/setup.bash
-echo "$GAZEBO_MODEL_PATH" | tr ':' '\n' | grep rotors_gazebo
-echo "$GAZEBO_RESOURCE_PATH" | tr ':' '\n' | grep rotors_gazebo
-rospack plugins --attrib=plugin gazebo_ros
-```
-
-运行 Gazebo 后检查：
-
-```bash
-gz topic -l | head
-rostopic list | grep -E '^/clock|^/gazebo'
-```
-
-通过标准：
-
-- Gazebo 不报找不到 model/resource。
-- `gz topic -l` 能返回 Gazebo transport topic。
-- ROS 侧 `/clock`、`/gazebo/*` 正常。
-
-### Step 3：UAV spawn 成功
-
-- 做什么（具体操作）
-  - 新建 `exploration_manager/launch/uav_simulation.launch`。
-  - 只负责单 UAV spawn、状态发布、基础控制器加载。
-  - 推荐先使用 `mav_name:=iris`。
-- 修改/涉及文件（路径级别）
-  - 新增：
-    - `src/RACER/swarm_exploration/exploration_manager/launch/uav_simulation.launch`
-  - 参考：
-    - `src/RACER/swarm_exploration/rotors_simulator/rotors_gazebo/launch/spawn_mav.launch`
-    - `src/RACER/swarm_exploration/fuae_gazebo/launch/spawn_mav.launch`
-    - `src/RACER/swarm_exploration/rotors_simulator/rotors_gazebo/launch/mav_hovering_example.launch`
-- 为什么做
-  - 满足验收要求：`roslaunch exploration_manager uav_simulation.launch` 可显示无人机。
-  - 与 world launch 解耦后，spawn 问题可以单独重试，不需要反复重启 Gazebo。
-- 建议 launch 内容
-
-```xml
-<launch>
-  <arg name="mav_name" default="iris"/>
-  <arg name="namespace" default="$(arg mav_name)"/>
-  <arg name="x" default="0.0"/>
-  <arg name="y" default="0.0"/>
-  <arg name="z" default="0.1"/>
-  <arg name="enable_logging" default="false"/>
-  <arg name="enable_ground_truth" default="true"/>
-
-  <group ns="$(arg namespace)">
-    <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
-      <arg name="mav_name" value="$(arg mav_name)"/>
-      <arg name="namespace" value="$(arg namespace)"/>
-      <arg name="model" value="$(find rotors_description)/urdf/$(arg mav_name)_base.xacro"/>
-      <arg name="x" value="$(arg x)"/>
-      <arg name="y" value="$(arg y)"/>
-      <arg name="z" value="$(arg z)"/>
-      <arg name="enable_logging" value="$(arg enable_logging)"/>
-      <arg name="enable_ground_truth" value="$(arg enable_ground_truth)"/>
-    </include>
-
-    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
-    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
-  </group>
-</launch>
-```
-
-- 如何验证（必须可执行）
-
-终端 1：
-
-```bash
-cd /home/jacob/racer_ws
-source devel/setup.bash
-roslaunch exploration_manager env_simulation.launch world_name:=basic paused:=true verbose:=true
-```
-
-终端 2：
-
-```bash
-source /home/jacob/racer_ws/devel/setup.bash
-roslaunch exploration_manager uav_simulation.launch mav_name:=iris namespace:=iris x:=0 y:=0 z:=0.1
-```
-
-终端 3：
-
-```bash
-source /home/jacob/racer_ws/devel/setup.bash
-rosservice call /gazebo/get_model_state '{model_name: iris, relative_entity_name: world}'
-rostopic list | grep '^/iris'
-```
-
-通过标准：
-
-- Gazebo 中出现 `iris` 模型。
-- `/gazebo/get_model_state` 返回 `success: True`。
-- 模型不穿模、不爆炸、不倒飞。
-- 至少出现 `/iris/imu`、`/iris/odometry_sensor1/odometry` 或 `/iris/ground_truth/odometry`、`/iris/joint_states` 等 topic。
-
-### Step 4：插件加载成功（动力学生效）
-
-- 做什么（具体操作）
-  - 在 `uav_simulation.launch` 中加入 `rotors_control/lee_position_controller_node`。
-  - 使用 rotors 自带 yaml 参数。
-  - 将 controller 的 `odometry` remap 到 UAV odometry plugin 输出。
-- 修改/涉及文件（路径级别）
-  - 修改：
-    - `src/RACER/swarm_exploration/exploration_manager/launch/uav_simulation.launch`
-  - 涉及：
-    - `src/RACER/swarm_exploration/rotors_simulator/rotors_gazebo/resource/lee_controller_iris.yaml`
-    - `src/RACER/swarm_exploration/rotors_simulator/rotors_gazebo/resource/iris.yaml`
-- 为什么做
-  - UAV 能 spawn 只是模型加载成功；要“能动”，必须确认 controller、controller interface、motor model 三段都有效。
-- 建议追加 launch 内容
-
-```xml
-<node name="lee_position_controller_node"
-      pkg="rotors_control"
-      type="lee_position_controller_node"
-      output="screen">
-  <rosparam command="load" file="$(find rotors_gazebo)/resource/lee_controller_$(arg mav_name).yaml"/>
-  <rosparam command="load" file="$(find rotors_gazebo)/resource/$(arg mav_name).yaml"/>
-  <remap from="odometry" to="odometry_sensor1/odometry"/>
-</node>
-```
-
-该 node 必须放在 `<group ns="$(arg namespace)">` 内。
-
-- 如何验证（必须可执行）
-
-```bash
-source /home/jacob/racer_ws/devel/setup.bash
-rosnode list | grep lee_position_controller
-rostopic info /iris/odometry_sensor1/odometry
-rostopic info /iris/command/motor_speed
-rostopic echo -n 1 /iris/odometry_sensor1/odometry
-```
-
-如果 `/iris/odometry_sensor1/odometry` 不存在，检查 ground truth odom：
-
-```bash
-rostopic list | grep odom
-rostopic echo -n 1 /iris/ground_truth/odometry
-```
-
-通过标准：
-
-- `lee_position_controller_node` 存在。
-- `odometry` 输入有 publisher。
-- `/iris/command/motor_speed` 有 publisher。
-- Gazebo 终端没有以下错误：
-  - `Failed to load plugin librotors_gazebo_motor_model.so`
-  - `Failed to load plugin librotors_gazebo_controller_interface.so`
-  - `Failed to load plugin librotors_gazebo_odometry_plugin.so`
-  - `Failed to load plugin librotors_gazebo_imu_plugin.so`
-
-### Step 5：简单控制输入（hover / command trajectory）
-
-- 做什么（具体操作）
-  - 首先使用 rotors 自带 `hovering_example` 发布一次 hover command。
-  - 不接 Racer planner，不接传感器，不接地图。
-  - 如果需要移动验证，再手动发布 `trajectory_msgs/MultiDOFJointTrajectory` 到 `/iris/command/trajectory`。
-- 修改/涉及文件（路径级别）
-  - 可选修改：
-    - `src/RACER/swarm_exploration/exploration_manager/launch/uav_simulation.launch`
-  - 推荐把 hovering example 做成可开关参数：
-
-```xml
-<arg name="start_hover" default="true"/>
-<node if="$(arg start_hover)"
-      name="hovering_example"
-      pkg="rotors_gazebo"
-      type="hovering_example"
-      output="screen"/>
-```
-
-- 为什么做
-  - `hovering_example` 已经和 rotors 的 `command/trajectory` 对齐，是验证物理闭环的最低成本方式。
-  - 这一步证明 UAV 不是只被 spawn，而是能在物理引擎下响应控制。
-- 如何验证（必须可执行）
-
-终端 1：
-
-```bash
-source /home/jacob/racer_ws/devel/setup.bash
-roslaunch exploration_manager env_simulation.launch world_name:=basic paused:=true verbose:=true
-```
-
-终端 2：
-
-```bash
-source /home/jacob/racer_ws/devel/setup.bash
-roslaunch exploration_manager uav_simulation.launch mav_name:=iris namespace:=iris start_hover:=true
-```
-
-终端 3：
-
-```bash
-source /home/jacob/racer_ws/devel/setup.bash
-rostopic echo -n 1 /iris/command/trajectory
-rostopic echo -n 1 /iris/command/motor_speed
-rostopic echo -n 1 /iris/odometry_sensor1/odometry
-```
-
-如 Gazebo 仍暂停：
-
-```bash
-rosservice call /gazebo/unpause_physics "{}"
-```
-
-通过标准：
-
-- `/iris/command/trajectory` 收到 hover command。
-- `/iris/command/motor_speed` 持续发布电机角速度。
-- `/iris/odometry_sensor1/odometry` 的 z 值从初始高度向约 2m 变化，最终可悬停。
-- Gazebo 中 UAV 能起飞或至少明显响应控制。
-
-### Step 6：RViz 可视化验证
-
-- 做什么（具体操作）
-  - 启动 RViz 或 `odom_visualization`，只显示 UAV odom/TF。
-  - 如果要沿用 Racer 的 odom 可视化习惯，将 Gazebo odom 最小代价 relay/remap 到 `/state_ukf/odom`。
-- 修改/涉及文件（路径级别）
-  - 优先不改核心算法。
-  - 可新增一个只用于 Phase 1 的 launch：
-    - `src/RACER/swarm_exploration/exploration_manager/launch/rviz_gazebo_mvp.launch`
-  - 或复用已有：
-    - `src/RACER/swarm_exploration/exploration_manager/launch/rviz.launch`
-    - `src/RACER/uav_simulator/Utils/odom_visualization`
-- 为什么做
-  - Gazebo GUI 能显示模型，但 RViz 可以验证 ROS 侧 odom/TF 是否正常。
-  - 后续接 Racer planner 时，`/state_ukf/odom` 是最小对接点。
-- 如何验证（必须可执行）
-
-```bash
-source /home/jacob/racer_ws/devel/setup.bash
-rosrun odom_visualization odom_visualization __name:=odom_visualization_iris _color/r:=0.0 _color/g:=1.0 _color/b:=0.0 _robot_scale:=1.0 /odom_visualization_iris/odom:=/iris/odometry_sensor1/odometry
-```
-
-或使用 `topic_tools` relay：
-
-```bash
-source /home/jacob/racer_ws/devel/setup.bash
-rosrun topic_tools relay /iris/odometry_sensor1/odometry /state_ukf/odom
-rostopic echo -n 1 /state_ukf/odom
-```
-
-再启动 RViz：
-
-```bash
-roslaunch exploration_manager rviz.launch
-```
-
-通过标准：
-
-- RViz 中能看到 UAV odom 轨迹或模型。
-- `rostopic echo -n 1 /state_ukf/odom` 有数据。
-- `rosrun tf view_frames` 或 `rostopic echo -n 1 /tf` 能看到 UAV TF。
-
-### Step 7：Phase 1 中 Racer 最小代价对接
-
-- 做什么（具体操作）
-  - Phase 1 不启动 Racer 核心 exploration/planning。
-  - 只做 topic 级别兼容验证：
-    - Gazebo odom relay 到 Racer 常用 odom 名称。
-    - 简单控制继续使用 rotors `command/trajectory`。
-  - 若必须验证 Racer `PositionCommand` 到 Gazebo 控制输入，则新增一个独立 adapter 节点，不改 `plan_manage`、`exploration_manager` 核心算法。
-- 修改/涉及文件（路径级别）
-  - 必选：
-    - `src/RACER/swarm_exploration/exploration_manager/launch/uav_simulation.launch`
-  - 可选新增：
-    - `src/RACER/swarm_exploration/fuae_gazebo/src/position_cmd_to_rotors_trajectory.cpp`
-    - `src/RACER/swarm_exploration/fuae_gazebo/CMakeLists.txt`
-    - `src/RACER/swarm_exploration/fuae_gazebo/package.xml`
-- 为什么做
-  - Racer planner 输出 `quadrotor_msgs/PositionCommand`，rotors controller 需要 `trajectory_msgs/MultiDOFJointTrajectory`。
-  - 直接改 Racer 核心算法风险高，违反 Phase 1 “最小系统跑通优先”原则。
-  - 独立 adapter 是最小、可回滚、边界清晰的方案。
-- 最小 topic 对接建议
-
-```text
-Gazebo odom:
-  /iris/odometry_sensor1/odometry
-    relay/remap →
-  /state_ukf/odom
-
-Gazebo imu:
-  /iris/imu
-    暂只验证 echo，不接入 Racer state estimator
-
-Racer command（可选，不作为第一轮 MVP 必须项）:
-  /planning/pos_cmd_1 或 /position_cmd
-    adapter →
-  /iris/command/trajectory
-```
-
-- 如何验证（必须可执行）
-
-```bash
-source /home/jacob/racer_ws/devel/setup.bash
-rosrun topic_tools relay /iris/odometry_sensor1/odometry /state_ukf/odom
-rostopic echo -n 1 /state_ukf/odom
-rostopic echo -n 1 /iris/imu
-```
-
-如实现 adapter，再验证：
-
-```bash
-rostopic info /planning/pos_cmd_1
-rostopic info /iris/command/trajectory
-```
-
-通过标准：
-
-- Gazebo odom 能被 Racer 侧期望 topic 名称读取。
-- 不需要启动 `swarm_exploration.launch` 或 `single_drone_exploration.xml`。
-- 不引入 realsense、velodyne、`gazebo_map_generator`、`local_sensing_node/pcl_render_node`。
-
-## 4. 最小运行命令（必须给）
-
-### 启动 Gazebo
-
-```bash
-cd /home/jacob/racer_ws
-source /opt/ros/$ROS_DISTRO/setup.bash
-source devel/setup.bash
-roslaunch exploration_manager env_simulation.launch world_name:=basic paused:=true gui:=true verbose:=true
-```
-
-### spawn UAV
-
-另开终端：
-
-```bash
-cd /home/jacob/racer_ws
-source devel/setup.bash
-roslaunch exploration_manager uav_simulation.launch mav_name:=iris namespace:=iris x:=0 y:=0 z:=0.1 start_hover:=false
-```
-
-### 启动基础控制（hover）
-
-如果 `uav_simulation.launch` 使用 `start_hover:=true`：
-
-```bash
-cd /home/jacob/racer_ws
-source devel/setup.bash
-roslaunch exploration_manager uav_simulation.launch mav_name:=iris namespace:=iris x:=0 y:=0 z:=0.1 start_hover:=true
-```
-
-如果已经 spawn，只单独发 hover command：
-
-```bash
-cd /home/jacob/racer_ws
-source devel/setup.bash
-ROS_NAMESPACE=iris rosrun rotors_gazebo hovering_example _x:=0.0 _y:=0.0 _z:=2.0 _yaw:=0.0
-rosservice call /gazebo/unpause_physics "{}"
-```
-
-### 查看 Gazebo odom / imu
-
-```bash
-source /home/jacob/racer_ws/devel/setup.bash
-rostopic echo -n 1 /iris/odometry_sensor1/odometry
-rostopic echo -n 1 /iris/imu
-rostopic echo -n 1 /iris/command/motor_speed
-```
-
-### 最小对接 Racer odom 命名
-
-```bash
-source /home/jacob/racer_ws/devel/setup.bash
-rosrun topic_tools relay /iris/odometry_sensor1/odometry /state_ukf/odom
-rostopic echo -n 1 /state_ukf/odom
-```
-
-### RViz 可视化
-
-```bash
-source /home/jacob/racer_ws/devel/setup.bash
-roslaunch exploration_manager rviz.launch
-```
-
-或只启动 odom visualization：
-
-```bash
-source /home/jacob/racer_ws/devel/setup.bash
-rosrun odom_visualization odom_visualization /odom_visualization/odom:=/iris/odometry_sensor1/odometry
-```
-
-## 5. Phase 1 验收标准（非常重要）
-
-1. 环境可启动
-   - 能通过以下命令一键启动 Gazebo：
-
-```bash
-roslaunch exploration_manager env_simulation.launch
-```
-
-   - Gazebo 无 fatal/error；允许不影响运行的 warning。
-   - 指定 world 能正常加载。
-   - `basic.world` 中 ground plane、sun、基础光照正常显示。
-   - `/clock` 正常发布：
-
-```bash
-rostopic echo -n 1 /clock
-```
-
-2. 模型可正确加载
-   - 能通过以下命令显示无人机：
-
-```bash
-roslaunch exploration_manager uav_simulation.launch
-```
-
-   - `iris` 或选定 UAV 在 Gazebo 中正确生成。
-   - 模型不穿模、不散架、不倒飞。
-   - 连杆、关节、碰撞体、惯性参数基本合理。
-   - `/gazebo/get_model_state` 返回成功：
-
-```bash
-rosservice call /gazebo/get_model_state '{model_name: iris, relative_entity_name: world}'
-```
-
-3. 基础控制可用
-   - 能通过 rotors `command/trajectory` 或 `command/pose` 驱动 UAV。
-   - MVP 控制输入采用：
-
-```bash
-ROS_NAMESPACE=iris rosrun rotors_gazebo hovering_example _x:=0.0 _y:=0.0 _z:=2.0 _yaw:=0.0
-```
-
-   - `/iris/command/trajectory` 有消息。
-   - `/iris/command/motor_speed` 有持续输出。
-   - UAV 能起飞、悬停或执行简单位置变化。
-   - Phase 1 不要求 `/cmd_vel`；若后续需要 `/cmd_vel`，应作为 adapter 输入转换到 `/iris/command/trajectory`，不能直接修改 Racer 核心算法。
-
-4. 时钟与 TF 正常
-   - `/clock` 正常发布。
-   - 所有需要仿真时间的节点使用 `/use_sim_time:=true`。
-   - TF 树至少包含：
-     - `world`
-     - `iris/base_link` 或等价 UAV base frame
-     - `iris/imu_link` 或等价 IMU frame
-   - 由于 Phase 1 禁止外部传感器，realsense/velodyne frame 不作为验收项。
-
-5. Gazebo odom / imu 正常
-   - Gazebo odom 可读：
-
-```bash
-rostopic echo -n 1 /iris/odometry_sensor1/odometry
-```
-
-   - Gazebo imu 可读：
-
-```bash
-rostopic echo -n 1 /iris/imu
-```
-
-   - 最小对接到 Racer odom 名称可用：
-
-```bash
-rosrun topic_tools relay /iris/odometry_sensor1/odometry /state_ukf/odom
-rostopic echo -n 1 /state_ukf/odom
-```
-
-6. 基础场景闭环成立
-   - UAV 能在场景中完成最基本动作：
-     - 从地面附近起飞到约 2m。
-     - 悬停保持。
-     - 可通过新的 trajectory command 做小范围平移。
-   - Phase 1 不要求导航链路、地图/定位/控制全链路。
-   - 如果临时使用 Racer RViz/odom visualization，仅要求 odom 可视化闭环，不要求 exploration planner 跑通。
-
-7. 良好的 launch 管理
-   - 能通过以下命令打开 Gazebo 对应环境：
-
-```bash
-roslaunch exploration_manager env_simulation.launch
-```
-
-   - 能通过以下命令显示无人机：
-
-```bash
-roslaunch exploration_manager uav_simulation.launch
-```
-
-   - 两个 launch 均不启动：
-     - realsense
-     - velodyne
-     - `gazebo_map_generator`
-     - `local_sensing_node/pcl_render_node`
-     - Racer exploration core
-
-# Phase 2（简要规划）
-
-目标：传感器配置完成，数据正常，具备完整建图、规划能力。
-
-Phase 2 只在 Phase 1 全部验收通过后启动，建议拆为以下子阶段：
-
-1. 传感器接入
-   - 选择 UAV 模型挂载 realsense 或 velodyne。
-   - 明确 sensor frame、update rate、噪声模型、Gazebo plugin。
-   - 验证 `/camera/depth/*`、`/velodyne_points` 或对应点云 topic。
-2. Gazebo 感知数据接入 Racer
-   - 将 Gazebo depth/pointcloud 对接到 Racer 现有 `plan_env` / `local_sensing_node` / mapping 输入。
-   - 统一 frame 与 timestamp，确保使用 `/clock`。
-3. 建图闭环
-   - 验证局部/全局 occupancy map 或 ESDF/TSDF 输入输出。
-   - 再考虑是否启用 `gazebo_map_generator`。
-4. 规划闭环
-   - 将 Gazebo odom 接到 Racer planner。
-   - 将 Racer `quadrotor_msgs/PositionCommand` 通过独立 adapter 转为 rotors `command/trajectory`，或实现 `PositionCommand -> motor/control` 的专用 Gazebo 控制桥。
-5. 多机与复杂环境
-   - 单机稳定后再扩展多 UAV namespace。
-   - 最后再引入 Star-Searcher 复杂 world、随机地图、动态障碍。
-
-# 常见错误排查（重点针对 Phase 1）
-
-## world 加载失败
-
-症状：
-
-- Gazebo GUI 不打开。
-- 终端出现 `Unable to find uri[model://...]`。
-- 终端出现 `Failed to load plugin librotors_gazebo_ros_interface_plugin.so`。
-
-排查：
-
-```bash
-source /home/jacob/racer_ws/devel/setup.bash
-rospack find rotors_gazebo
-echo "$GAZEBO_MODEL_PATH" | tr ':' '\n'
-echo "$GAZEBO_RESOURCE_PATH" | tr ':' '\n'
-ls /home/jacob/racer_ws/devel/lib/librotors_gazebo_ros_interface_plugin.so
-```
-
-处理：
-
-- 确认已 `source devel/setup.bash`。
-- 在 `env_simulation.launch` 中设置：
-
-```xml
-<env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find rotors_gazebo)/models"/>
-<env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find rotors_gazebo)/models"/>
-```
-
-- 如果插件 so 不存在，重新构建：
-
-```bash
-cd /home/jacob/racer_ws
-catkin_make --pkg rotors_gazebo_plugins rotors_gazebo
-```
-
-## spawn 失败
-
-症状：
-
-- `spawn_model` 报错。
-- Gazebo 中没有 `iris`。
-- `/gazebo/get_model_state` 返回 `success: False`。
-
-排查：
-
-```bash
-source /home/jacob/racer_ws/devel/setup.bash
-rosservice list | grep spawn
-rosparam get /iris/robot_description >/tmp/iris.urdf
-check_urdf /tmp/iris.urdf
-rosservice call /gazebo/get_model_state '{model_name: iris, relative_entity_name: world}'
-```
-
-处理：
-
-- 确认 Gazebo 已启动后再运行 `uav_simulation.launch`。
-- 确认 xacro 可展开：
-
-```bash
-rosrun xacro xacro $(rospack find rotors_description)/urdf/iris_base.xacro mav_name:=iris namespace:=iris
-```
-
-- 若 `iris_base.xacro` 不完整，先退回 rotors 官方示例验证：
-
-```bash
-roslaunch rotors_gazebo mav_hovering_example.launch mav_name:=iris world_name:=basic
-```
-
-## plugin 未加载（最关键）
-
-症状：
-
-- UAV spawn 成功但像普通静态/自由落体模型一样，不响应控制。
-- `/iris/command/motor_speed` 有消息但 UAV 不动。
-- Gazebo 终端有 `Failed to load plugin`。
-
-排查：
-
-```bash
-source /home/jacob/racer_ws/devel/setup.bash
-ls devel/lib/librotors_gazebo_motor_model.so
-ls devel/lib/librotors_gazebo_controller_interface.so
-ls devel/lib/librotors_gazebo_odometry_plugin.so
-ls devel/lib/librotors_gazebo_imu_plugin.so
-rostopic info /iris/command/motor_speed
-rostopic list | grep gazebo/command/motor_speed
-```
-
-处理：
-
-- 重新构建插件：
-
-```bash
-cd /home/jacob/racer_ws
-catkin_make --pkg rotors_gazebo_plugins rotors_description rotors_gazebo rotors_control
-source devel/setup.bash
-```
-
-- 确认模型 xacro 中确实包含：
-  - `controller_plugin_macro`
-  - `librotors_gazebo_motor_model.so`
-  - `librotors_gazebo_multirotor_base_plugin.so`
-  - `librotors_gazebo_odometry_plugin.so`
-  - `librotors_gazebo_imu_plugin.so`
-- 确认 `lee_position_controller_node` 在 UAV namespace 内运行。
-
-## UAV 不动
-
-症状：
-
-- UAV 正常 spawn。
-- odom 正常。
-- hover command 发出后 UAV 不起飞。
-
-排查：
-
-```bash
-rostopic echo -n 1 /iris/command/trajectory
-rostopic echo -n 1 /iris/odometry_sensor1/odometry
-rostopic echo -n 1 /iris/command/motor_speed
-rosservice call /gazebo/get_physics_properties
-```
-
-处理：
-
-- 解除暂停：
-
-```bash
-rosservice call /gazebo/unpause_physics "{}"
-```
-
-- 确认 odom remap：
-  - `lee_position_controller_node` 订阅的是 `odometry`
-  - 在 `uav_simulation.launch` 内应 remap 到 `odometry_sensor1/odometry`
-- 确认命令 topic namespace：
-
-```bash
-ROS_NAMESPACE=iris rosrun rotors_gazebo hovering_example _x:=0 _y:=0 _z:=2 _yaw:=0
-```
-
-- 确认电机命令有 subscriber：
-
-```bash
-rostopic info /iris/command/motor_speed
-```
-
-## topic 不通
-
-症状：
-
-- `rostopic echo` 无输出。
-- controller 没有收到 odom。
-- Racer RViz 看不到 odom。
-
-排查：
-
-```bash
-rostopic list | sort | grep -E 'iris|odom|imu|command|clock|tf'
-rostopic info /iris/odometry_sensor1/odometry
-rostopic info /iris/command/trajectory
-rostopic info /iris/command/motor_speed
-rosnode info /iris/lee_position_controller_node
-```
-
-处理：
-
-- namespace 必须一致：
-  - UAV namespace：`iris`
-  - controller 在 `/iris` group 内
-  - hover command 用 `ROS_NAMESPACE=iris`
-- 如果 Racer 侧需要 `/state_ukf/odom`：
-
-```bash
-rosrun topic_tools relay /iris/odometry_sensor1/odometry /state_ukf/odom
-```
-
-- Phase 1 不启动多机 remap，避免 `/state_ukf/odom_1`、`/state_ukf/odom`、`/iris/odometry_sensor1/odometry` 混用。
-
-## Racer topic 与 Gazebo topic 对接总结
-
-Racer 控制/规划侧：
-
-```text
-traj_server:
-  subscribe /odom_world
-  publish   /position_cmd                  quadrotor_msgs/PositionCommand
-
-single_drone_exploration.xml:
-  /odom_world    -> $(arg odom_prefix)_$(arg drone_id)
-  /position_cmd  -> planning/pos_cmd_$(arg drone_id)
-
-so3_control:
-  subscribe ~odom
-  subscribe ~position_cmd
-  subscribe ~imu
-  publish   ~so3_cmd
-
-poscmd_2_odom:
-  subscribe ~command
-  publish   ~odometry
-```
-
-Gazebo/rotors 侧：
-
-```text
-lee_position_controller_node:
-  subscribe /iris/command/pose
-  subscribe /iris/command/trajectory
-  subscribe /iris/odometry_sensor1/odometry
-  publish   /iris/command/motor_speed
-
-Gazebo plugins:
-  publish /iris/odometry_sensor1/odometry
-  publish /iris/imu
-  consume /iris/gazebo/command/motor_speed
-```
-
-Phase 1 最小代价对接原则：
-
-- 第一轮 MVP 不接 Racer planner，只用 rotors hover command。
-- odom 只做 relay/remap：
-
-```bash
-rosrun topic_tools relay /iris/odometry_sensor1/odometry /state_ukf/odom
-```
-
-- 如必须让 Racer `PositionCommand` 驱动 Gazebo，则新增独立 adapter：
-
-```text
-/planning/pos_cmd_1 或 /position_cmd
-  quadrotor_msgs/PositionCommand
-    ↓
-position_cmd_to_rotors_trajectory
-    ↓
-/iris/command/trajectory
-  trajectory_msgs/MultiDOFJointTrajectory
-```
-
-- adapter 不属于第一轮 smoke test，必须在 world、spawn、plugin、hover 都通过后再做。
+参数加载：
+
+- 当前工程没有读取到 `algorithm.xml` 文件。
+- 真实存在并被 Racer 使用的是：
+  - `src/RACER/swarm_exploration/exploration_manager/launch/single_drone_exploration.xml`
+  - `src/RACER/swarm_exploration/exploration_manager/launch/single_drone_planner.xml`
+  - `src/RACER/swarm_exploration/plan_manage/launch/kino_algorithm.xml`
+  - `src/RACER/swarm_exploration/plan_manage/launch/topo_algorithm.xml`
+- 最小替代方案：
+  - `searchmap1.launch` 直接 include `single_drone_exploration.xml`，继续使用其中的参数系统。
+  - 若后续确实需要 `algorithm.xml` 命名兼容，可新增 `src/RACER/swarm_exploration/exploration_manager/launch/algorithm.xml`，仅作为 thin wrapper include `single_drone_planner.xml`，不复制大段参数。
+
+## 5. Racer 对接重点
+
+### Racer 输入 topic
+
+每架 UAV 的 `single_drone_exploration.xml` 参数建议：
+
+以 `/uav0` 为例：
+
+- `drone_id=1`
+- `drone_num=$(arg drone_num)`
+- `odometry_topic=/uav0/odom`
+- `sensor_pose_topic=/uav0/sensor_pose`
+- `depth_topic=/uav0/depth/disparity`，保留但首选不用
+- `cloud_topic=/uav0/depth/points`
+- `simulation=false`
+
+对应 remap 由 `single_drone_planner.xml` 完成：
+
+- `/odom_world` -> `/uav0/odom`
+- `/map_ros/pose` -> `/uav0/sensor_pose`
+- `/map_ros/depth` -> `/uav0/depth/disparity`
+- `/map_ros/cloud` -> `/uav0/depth/points`
+
+同理：
+
+- `/uav1` 对应 `drone_id=2`
+- `/uav2` 对应 `drone_id=3`
+- `/uav3` 对应 `drone_id=4`
+
+IMU：
+
+- Racer 当前核心订阅链路未发现直接订阅 `/imu` 或 `/imu/data`。
+- IMU 仍必须由 Gazebo 发布给控制/状态链路和验收：
+  - `/uavN/imu/data`
+- 若后续加入 VIO/UKF，则把 `/uavN/imu/data` 与 `/uavN/depth/*` 接到估计节点，输出 `/uavN/odom`；Phase 2 最小闭环先使用 Gazebo ground truth odometry 转发为 `/uavN/odom`。
+
+### Gazebo 如何提供
+
+- odom：
+  - `iris_base.xacro` 已有 `odometry_plugin_macro`
+  - 当前 topic：`/uavN/ground_truth/odometry`
+  - 新增 relay 或 remap：`/uavN/ground_truth/odometry -> /uavN/odom`
+- cloud：
+  - `iris_base.xacro` 新增/启用 depth camera
+  - 输出 `/uavN/depth/points`
+- sensor pose：
+  - 新增 `sensor_pose_from_tf` 节点
+  - 从 TF 查询 `map` 到 `uavN/camera_depth_optical_center_link`
+  - 发布 `/uavN/sensor_pose`，类型 `geometry_msgs/PoseStamped`，30Hz
+- IMU：
+  - `iris_base.xacro` 保留/调整 IMU 插件
+  - 输出 `/uavN/imu/data`
+
+### 控制输出如何作用 UAV
+
+Racer 输出：
+
+- `src/RACER/swarm_exploration/plan_manage/src/traj_server.cpp`
+  - 发布 `/position_cmd`，类型 `quadrotor_msgs/PositionCommand`
+- `single_drone_exploration.xml`
+  - 已将 `/position_cmd` remap 为 `planning/pos_cmd_$(arg drone_id)`
+
+Phase 2 建议改成 namespace 内 topic：
+
+- `/uav0/planning/pos_cmd`
+- `/uav1/planning/pos_cmd`
+- `/uav2/planning/pos_cmd`
+- `/uav3/planning/pos_cmd`
+
+rotors 输入：
+
+- `lee_position_controller_node` 接收：
+  - `/uavN/command/pose`
+  - `/uavN/command/trajectory`
+  - `/uavN/odometry`
+- 发布：
+  - `/uavN/command/motor_speed`
+
+最小桥接方案：
+
+- 新增节点：
+  - `src/RACER/swarm_exploration/exploration_manager/scripts/poscmd_to_mav_trajectory.py`
+  - 或 C++ 节点 `poscmd_to_mav_trajectory`
+- 订阅：
+  - `/uavN/planning/pos_cmd`，类型 `quadrotor_msgs/PositionCommand`
+- 发布：
+  - `/uavN/command/trajectory`，类型 `trajectory_msgs/MultiDOFJointTrajectory`
+- 转换字段：
+  - position -> `transforms[0].translation`
+  - yaw -> `transforms[0].rotation`
+  - velocity -> `velocities[0].linear`
+  - yaw_dot -> `velocities[0].angular.z`
+  - acceleration -> `accelerations[0].linear`
+- 同时确保 `lee_position_controller_node` 的 `odometry` remap 到 `/uavN/odom` 或 `/uavN/ground_truth/odometry`。
+- Phase 2 运行时必须关闭 `hovering_example`，否则它会持续向相同控制链路发送 hover 目标，与 Racer 控制冲突。
+
+## 6. 实现步骤
+
+### Step 1：新增 Phase 2 统一入口
+
+- 做什么：
+  - 新增 `searchmap1.launch`，统一启动 MAP1、2-4 UAV、传感器、Racer、控制桥接、RViz。
+- 修改文件路径：
+  - `src/RACER/swarm_exploration/exploration_manager/launch/searchmap1.launch`
+- 预期结果：
+  - 可执行 `roslaunch exploration_manager searchmap1.launch`
+  - 默认启动 4 架 `/uav0~3`
+  - 可通过 `drone_num:=2/3/4` 控制数量
+- 验证方法：
+  - `roslaunch --nodes exploration_manager searchmap1.launch`
+  - `rosparam get /use_sim_time`
+  - `rostopic echo -n 1 /clock`
+
+### Step 2：调整多 UAV namespace
+
+- 做什么：
+  - 保留 Phase 1 的 `iris_1~4` 入口不动或只做兼容。
+  - 在 `searchmap1.launch` 中明确使用 `/uav0~3`。
+- 修改文件路径：
+  - `src/RACER/swarm_exploration/exploration_manager/launch/searchmap1.launch`
+  - 如需复用，扩展 `src/RACER/swarm_exploration/exploration_manager/launch/gazebo_phase1.launch`
+  - 如需复用，扩展 `src/RACER/swarm_exploration/exploration_manager/launch/uav_simulation.launch`
+- 预期结果：
+  - Gazebo model 名为 `uav0`、`uav1`、`uav2`、`uav3`
+  - topic 不再出现 Phase 2 的 `iris_1~4`
+- 验证方法：
+  - `rosservice call /gazebo/get_world_properties`
+  - `rostopic list | grep '^/uav[0-3]/'`
+
+### Step 3：为 iris 添加深度相机
+
+- 做什么：
+  - 在 `iris_base.xacro` 中挂载 depth camera。
+  - 修正 `component_snippets.xacro` 中 depth sensor/plugin 名称的 `${camera_suffix}` 拼写问题。
+- 修改文件路径：
+  - `src/RACER/swarm_exploration/rotors_simulator/rotors_gazebo/models/rotors_description/urdf/iris_base.xacro`
+  - `src/RACER/swarm_exploration/rotors_simulator/rotors_gazebo/models/rotors_description/urdf/component_snippets.xacro`
+- 预期结果：
+  - 每架 UAV 发布 `/uavN/depth/points`
+  - 每架 UAV 发布 depth image 或 disparity topic
+- 验证方法：
+  - `rostopic hz /uav0/depth/points`
+  - `rostopic echo -n 1 /uav0/depth/points/header`
+  - RViz 添加 PointCloud2 查看 `/uav0/depth/points`
+
+### Step 4：调整 IMU topic
+
+- 做什么：
+  - 把 `iris_base.xacro` 中 IMU topic 改为 `imu/data`。
+  - 把 controller plugin 的 `imu_sub_topic` 同步改为 `imu/data`。
+- 修改文件路径：
+  - `src/RACER/swarm_exploration/rotors_simulator/rotors_gazebo/models/rotors_description/urdf/iris_base.xacro`
+- 预期结果：
+  - 每架 UAV 发布 `/uavN/imu/data`
+  - controller plugin 仍能收到 IMU。
+- 验证方法：
+  - `rostopic hz /uav0/imu/data`
+  - `rostopic echo -n 1 /uav0/imu/data/header`
+
+### Step 5：建立 TF 与 sensor pose
+
+- 做什么：
+  - 建立 `map -> uavN/odom -> uavN/base_link -> sensor_link`。
+  - 新增 odom TF 发布节点或在 launch 中用现有 odom 转 TF。
+  - 新增 sensor pose 发布节点，将 TF 转为 `geometry_msgs/PoseStamped`。
+- 修改文件路径：
+  - `src/RACER/swarm_exploration/exploration_manager/scripts/sensor_pose_from_tf.py`
+  - `src/RACER/swarm_exploration/exploration_manager/scripts/odom_tf_broadcaster.py`
+  - `src/RACER/swarm_exploration/exploration_manager/CMakeLists.txt`
+  - `src/RACER/swarm_exploration/exploration_manager/package.xml`
+  - `src/RACER/swarm_exploration/exploration_manager/launch/searchmap1.launch`
+- 预期结果：
+  - `/uavN/sensor_pose` 以 30Hz 发布。
+  - TF tree 可从 `map` 查到每架 UAV 的 `base_link` 和 depth optical frame。
+- 验证方法：
+  - `rosrun tf tf_echo map uav0/base_link`
+  - `rosrun tf tf_echo map uav0/camera_depth_optical_center_link`
+  - `rostopic hz /uav0/sensor_pose`
+
+### Step 6：启动 Racer 多机探索
+
+- 做什么：
+  - 对每架 UAV include `single_drone_exploration.xml`。
+  - 传入 namespace 内 odom/cloud/sensor_pose topic。
+  - 保留 `single_drone_planner.xml` 中已有 swarm remap 机制。
+- 修改文件路径：
+  - `src/RACER/swarm_exploration/exploration_manager/launch/searchmap1.launch`
+  - 必要时新增 `src/RACER/swarm_exploration/exploration_manager/launch/uav_racer_simulation.launch`
+- 预期结果：
+  - 每架 UAV 启动一个 `exploration_node_<id>`。
+  - 每架 UAV 启动一个 `traj_server_<id>`。
+  - 每架 UAV 独立发布地图 topic。
+- 验证方法：
+  - `rosnode list | grep exploration_node`
+  - `rostopic hz /sdf_map/occupancy_all_1`
+  - `rostopic hz /sdf_map/unknown_1`
+  - `rostopic echo -n 1 /swarm_expl/drone_state`
+
+### Step 7：新增控制桥接
+
+- 做什么：
+  - 新增 `PositionCommand -> MultiDOFJointTrajectory` 桥接。
+  - 关闭 Phase 2 中的 `hovering_example`。
+- 修改文件路径：
+  - `src/RACER/swarm_exploration/exploration_manager/scripts/poscmd_to_mav_trajectory.py`
+  - `src/RACER/swarm_exploration/exploration_manager/CMakeLists.txt`
+  - `src/RACER/swarm_exploration/exploration_manager/package.xml`
+  - `src/RACER/swarm_exploration/exploration_manager/launch/searchmap1.launch`
+  - 或 `src/RACER/swarm_exploration/exploration_manager/launch/uav_racer_simulation.launch`
+- 预期结果：
+  - Racer 输出 `/uavN/planning/pos_cmd`
+  - 桥接输出 `/uavN/command/trajectory`
+  - Lee 控制器输出 `/uavN/command/motor_speed`
+  - UAV 在 Gazebo 中跟随 Racer 轨迹移动。
+- 验证方法：
+  - `rostopic hz /uav0/planning/pos_cmd`
+  - `rostopic hz /uav0/command/trajectory`
+  - `rostopic hz /uav0/command/motor_speed`
+  - `rostopic echo -n 1 /gazebo/model_states`
+
+### Step 8：RViz 与验收可视化
+
+- 做什么：
+  - 更新 RViz 配置，显示 `/uavN/odom`、`/uavN/depth/points`、`/sdf_map/occupancy_all_<id>`、`/sdf_map/unknown_<id>`。
+- 修改文件路径：
+  - `src/RACER/swarm_exploration/exploration_manager/launch/rviz.launch`
+  - `src/RACER/swarm_exploration/exploration_manager/config/swarm.rviz`
+- 预期结果：
+  - `roslaunch exploration_manager searchmap1.launch` 后 RViz 同步显示 UAV、传感器点云、探索地图。
+- 验证方法：
+  - RViz Fixed Frame 设置为 `map`。
+  - 检查 4 架 UAV marker、局部/全局 occupancy cloud 持续更新。
+
+### Step 9：编译与运行验证
+
+- 做什么：
+  - 编译新增脚本安装和 launch/xacro 修改。
+  - 运行 2、3、4 机配置。
+- 修改文件路径：
+  - `src/RACER/swarm_exploration/exploration_manager/CMakeLists.txt`
+  - `src/RACER/swarm_exploration/exploration_manager/package.xml`
+- 预期结果：
+  - `catkin_make` 通过。
+  - 2-4 架 UAV 都能自主运动。
+- 验证方法：
+  - `catkin_make`
+  - `roslaunch exploration_manager searchmap1.launch drone_num:=2`
+  - `roslaunch exploration_manager searchmap1.launch drone_num:=4`
+
+## 7. 验收标准
+
+- UAV 自主探索：
+  - 关闭 `hovering_example` 后，UAV 仍能由 Racer 产生 `/uavN/planning/pos_cmd` 并运动。
+  - `/gazebo/model_states` 中每架 UAV 位姿随时间变化。
+- 地图持续更新：
+  - `/sdf_map/occupancy_all_<id>`、`/sdf_map/unknown_<id>` 持续发布。
+  - RViz 中 occupancy/unknown 区域随 UAV 运动变化。
+- 无发散：
+  - UAV 不出现快速坠落、飞出地图、姿态翻转。
+  - `/uavN/command/motor_speed` 持续有合理数值。
+- 多机无冲突：
+  - `/uav0~3` topic 完全隔离。
+  - TF 中没有多个 UAV 共用同一个 `base_link`、`imu_link` 或 camera frame。
+  - UAV 间保持安全距离，Racer swarm topic 正常通信。
+- 传感器满足要求：
+  - `/uavN/depth/points` 或 depth image 为 20-30Hz。
+  - `/uavN/imu/data` 至少 20Hz。
+  - message header frame_id 与 TF 中 frame 可连通。
+
+## 8. 排查 checklist
+
+### TF 错误
+
+- `rosrun tf tf_echo map uav0/base_link` 是否可用。
+- `rosrun tf tf_echo map uav0/camera_depth_optical_center_link` 是否可用。
+- 若 RViz 报 `No transform`：
+  - 检查 `frameName` 是否包含 namespace。
+  - 检查 `robot_state_publisher` 是否在 `/uavN` namespace 下。
+  - 检查 odom TF broadcaster 是否发布 `uavN/odom -> uavN/base_link`。
+
+### namespace 冲突
+
+- `rostopic list | grep iris_`，Phase 2 正常情况下不应出现作为主链路的 `iris_1~4`。
+- `rostopic list | grep '^/uav[0-3]/'`，每架 UAV 应有独立 sensor、odom、control topic。
+- Gazebo model 名称应为 `uav0~3`。
+
+### topic 不通
+
+- cloud：
+  - `rostopic hz /uav0/depth/points`
+  - `rostopic echo -n 1 /uav0/depth/points/header`
+- pose：
+  - `rostopic hz /uav0/sensor_pose`
+- odom：
+  - `rostopic hz /uav0/odom`
+- Racer map：
+  - `rostopic hz /sdf_map/occupancy_all_1`
+  - `rostopic hz /sdf_map/unknown_1`
+
+### 控制无效
+
+- 检查 Racer 是否输出：
+  - `rostopic hz /uav0/planning/pos_cmd`
+- 检查桥接是否输出：
+  - `rostopic hz /uav0/command/trajectory`
+- 检查 Lee 控制器是否输出：
+  - `rostopic hz /uav0/command/motor_speed`
+- 若 `/uav0/command/trajectory` 有数据但 UAV 不动：
+  - 检查 `lee_position_controller_node` 的 odometry remap。
+  - 检查 `controller_plugin_macro` 是否接收 `/uav0/command/motor_speed`。
+  - 确认 Phase 2 中没有启动 `hovering_example` 与 Racer 抢控制。
+
+### 传感器无数据
+
+- 检查 xacro 是否实际生成 depth sensor：
+  - `rosparam get /uav0/robot_description | grep camera_depth`
+- 检查 Gazebo 插件是否加载失败：
+  - 查看 `~/.ros/log/latest` 中 `libgazebo_ros_openni_kinect.so` 相关错误。
+- 检查 topic frame：
+  - `/uav0/depth/points/header/frame_id`
+  - `/uav0/imu/data/header/frame_id`
+- 若 cloud 有数据但地图不更新：
+  - 检查 `/uav0/sensor_pose` 时间戳是否与 cloud 接近。
+  - 检查 `single_drone_planner.xml` 的 `/map_ros/cloud` remap 是否指向 `/uav0/depth/points`。

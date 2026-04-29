@@ -5,4 +5,4 @@ Description: Description of exploration_manager
 Version: 0.0.0
 Cflags: -I${prefix}/include
 Libs: -L${prefix}/lib -lexploration_manager
-Requires: plan_env path_searching bspline bspline_opt active_perception traj_utils lkh_tsp_solver lkh_mtsp_solver plan_manage message_runtime
+Requires: rospy sensor_msgs plan_env path_searching bspline bspline_opt active_perception traj_utils lkh_tsp_solver lkh_mtsp_solver plan_manage message_runtime

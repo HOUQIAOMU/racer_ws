@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
+<!--默认生成单架无人机-->
 <!--
   Phase 1 MVP: Spawn one UAV in Gazebo and start the rotors Lee position
   controller. Optionally start the rotors hovering example so the UAV
@@ -11,6 +12,8 @@
 <launch>
   <arg name="mav_name"  default="iris"/>
   <arg name="namespace" default="$(arg mav_name)"/>
+  <arg name="drone_id"  default="1"/>
+  <arg name="drone_num" default="1"/>
   <arg name="model"     default="$(find rotors_gazebo)/models/rotors_description/urdf/$(arg mav_name)_base.xacro"/>
 
   <!-- MAP1 has a wall at the origin, so spawn in a free area near the map corner. -->
@@ -32,6 +35,7 @@
   <arg name="odometry_topic"   default="ground_truth/odometry"/>
 
   <arg name="start_hover"   default="true"/>
+  <arg name="start_odom_visualization" default="true"/>
   <arg name="unpause"       default="true"/>
   <arg name="relay_to_racer_odom" default="true"/>
   <arg name="spawn_delay"   default="0.0"/>
@@ -84,6 +88,18 @@
       <param name="yaw" value="$(arg hover_yaw)"/>
     </node>
   </group>
+
+  <node if="$(arg start_odom_visualization)"
+        pkg="odom_visualization"
+        name="odom_visualization_$(arg drone_id)"
+        type="odom_visualization"
+        output="screen">
+    <remap from="~odom" to="/$(arg namespace)/$(arg odometry_topic)"/>
+    <param name="drone_id" value="$(arg drone_id)"/>
+    <param name="drone_num" value="$(arg drone_num)"/>
+    <param name="frame_id" value="world"/>
+    <param name="robot_scale" value="1.0"/>
+  </node>
 
   <!-- Auto-unpause Gazebo so the UAV can actually take off without manual call -->
   <node if="$(arg unpause)"

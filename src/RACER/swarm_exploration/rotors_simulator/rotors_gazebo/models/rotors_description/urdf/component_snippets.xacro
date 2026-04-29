@@ -406,7 +406,7 @@
       <limit upper="0" lower="0" effort="0" velocity="0" />
     </joint>
     <gazebo reference="${namespace}/camera_${camera_suffix}_link">
-      <sensor type="depth" name="${namespace}_camera_{camera_suffix}">
+      <sensor type="depth" name="${namespace}_camera_${camera_suffix}">
         <always_on>true</always_on>
         <update_rate>${frame_rate}</update_rate>
         <camera>
@@ -421,7 +421,7 @@
             <far>100</far>
           </clip>
         </camera>
-        <plugin name="${namespace}_camera_{camera_suffix}" filename="libgazebo_ros_openni_kinect.so">
+        <plugin name="${namespace}_camera_${camera_suffix}" filename="libgazebo_ros_openni_kinect.so">
           <robotNamespace>${namespace}</robotNamespace>
           <alwaysOn>true</alwaysOn>
           <baseline>0.11</baseline>
@@ -432,7 +432,7 @@
           <depthImageTopicName>depth/disparity</depthImageTopicName>
           <depthImageCameraInfoTopicName>depth/camera_info</depthImageCameraInfoTopicName>
           <pointCloudTopicName>depth/points</pointCloudTopicName>
-          <frameName>camera_${camera_suffix}_optical_center_link</frameName>
+          <frameName>${namespace}/camera_${camera_suffix}_optical_center_link</frameName>
           <pointCloudCutoff>0.5</pointCloudCutoff>
           <distortionK1>0.0</distortionK1>
           <distortionK2>0.0</distortionK2>

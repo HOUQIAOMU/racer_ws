@@ -94,3 +94,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/exploration_manager" TYPE FILE FILES "/home/jacob/racer_ws/src/RACER/swarm_exploration/exploration_manager/package.xml")
 endif()
 
+if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/exploration_manager" TYPE PROGRAM FILES "/home/jacob/racer_ws/build/RACER/swarm_exploration/exploration_manager/catkin_generated/installspace/world_cloud_publisher.py")
+endif()
+

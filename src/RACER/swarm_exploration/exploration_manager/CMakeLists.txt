@@ -11,6 +11,8 @@ find_package(PCL 1.7 REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  rospy
+  sensor_msgs
   std_msgs
   geometry_msgs
   quadrotor_msgs
@@ -47,7 +49,7 @@ generate_messages(
 catkin_package(
  INCLUDE_DIRS include
  LIBRARIES exploration_manager
- CATKIN_DEPENDS plan_env path_searching bspline bspline_opt active_perception traj_utils lkh_tsp_solver lkh_mtsp_solver plan_manage message_runtime
+ CATKIN_DEPENDS rospy sensor_msgs plan_env path_searching bspline bspline_opt active_perception traj_utils lkh_tsp_solver lkh_mtsp_solver plan_manage message_runtime
 #  DEPENDS system_lib
 )
 
@@ -65,6 +67,7 @@ add_executable(exploration_node
   src/fast_exploration_fsm.cpp
   src/fast_exploration_manager.cpp
   )
+add_dependencies(exploration_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(exploration_node 
   ${catkin_LIBRARIES}
   )
@@ -73,6 +76,12 @@ add_executable(ground_node
   src/ground_node.cpp 
   src/fast_exploration_manager.cpp
   )
+add_dependencies(ground_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(ground_node
   ${catkin_LIBRARIES}
   )
+
+catkin_install_python(PROGRAMS
+  scripts/world_cloud_publisher.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)

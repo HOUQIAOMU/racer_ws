@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<!--
+  Phase 1 Gazebo exploration entry point.
+
+  Adds 2-4 uniquely namespaced iris UAVs to an existing MAP1 Gazebo session,
+  and publishes a point cloud generated from the same MAP1.world for RViz.
+  Use the no-suffix uav_exploration wrapper for one-command startup.
+-->
+<launch>
+  <arg name="drone_num" default="4"/>
+  <arg name="world_name" default="MAP1"/>
+  <arg name="world_file" default="$(find fuae_gazebo)/worlds/$(arg world_name).world"/>
+  <arg name="gui" default="true"/>
+  <arg name="paused" default="true"/>
+  <arg name="verbose" default="true"/>
+  <arg name="launch_env" default="false"/>
+  <arg name="start_hover" default="true"/>
+  <arg name="start_odom_visualization" default="true"/>
+  <arg name="hover_z" default="2.0"/>
+  <arg name="publish_world_cloud" default="true"/>
+  <arg name="launch_rviz" default="true"/>
+  <arg name="x_1" default="-2.8"/>
+  <arg name="y_1" default="0.2"/>
+  <arg name="z_1" default="0.6"/>
+  <arg name="x_2" default="0.4"/>
+  <arg name="y_2" default="-2.4"/>
+  <arg name="z_2" default="0.6"/>
+  <arg name="x_3" default="0.0"/>
+  <arg name="y_3" default="1.4"/>
+  <arg name="z_3" default="0.6"/>
+  <arg name="x_4" default="1.4"/>
+  <arg name="y_4" default="-0.2"/>
+  <arg name="z_4" default="0.6"/>
+  <arg name="spawn_delay_1" default="0.0"/>
+  <arg name="spawn_delay_2" default="3.0"/>
+  <arg name="spawn_delay_3" default="6.0"/>
+  <arg name="spawn_delay_4" default="9.0"/>
+  <arg name="unpause_delay" default="12.0"/>
+  <arg name="hover_delay" default="14.0"/>
+
+  <include file="$(find exploration_manager)/launch/gazebo_phase1.launch">
+    <arg name="drone_num" value="$(arg drone_num)"/>
+    <arg name="world_name" value="$(arg world_name)"/>
+    <arg name="gui" value="$(arg gui)"/>
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="verbose" value="$(arg verbose)"/>
+    <arg name="launch_env" value="$(arg launch_env)"/>
+    <arg name="start_hover" value="$(arg start_hover)"/>
+    <arg name="start_odom_visualization" value="$(arg start_odom_visualization)"/>
+    <arg name="hover_z" value="$(arg hover_z)"/>
+    <arg name="x_1" value="$(arg x_1)"/>
+    <arg name="y_1" value="$(arg y_1)"/>
+    <arg name="z_1" value="$(arg z_1)"/>
+    <arg name="x_2" value="$(arg x_2)"/>
+    <arg name="y_2" value="$(arg y_2)"/>
+    <arg name="z_2" value="$(arg z_2)"/>
+    <arg name="x_3" value="$(arg x_3)"/>
+    <arg name="y_3" value="$(arg y_3)"/>
+    <arg name="z_3" value="$(arg z_3)"/>
+    <arg name="x_4" value="$(arg x_4)"/>
+    <arg name="y_4" value="$(arg y_4)"/>
+    <arg name="z_4" value="$(arg z_4)"/>
+    <arg name="spawn_delay_1" value="$(arg spawn_delay_1)"/>
+    <arg name="spawn_delay_2" value="$(arg spawn_delay_2)"/>
+    <arg name="spawn_delay_3" value="$(arg spawn_delay_3)"/>
+    <arg name="spawn_delay_4" value="$(arg spawn_delay_4)"/>
+    <arg name="unpause_delay" value="$(arg unpause_delay)"/>
+    <arg name="hover_delay" value="$(arg hover_delay)"/>
+  </include>
+
+  <node if="$(arg publish_world_cloud)"
+        pkg="exploration_manager"
+        name="map1_world_cloud"
+        type="world_cloud_publisher.py"
+        output="screen">
+    <param name="world_file" value="$(arg world_file)"/>
+    <param name="topic" value="/map_generator/global_cloud"/>
+    <param name="frame_id" value="world"/>
+    <param name="resolution" value="0.15"/>
+    <param name="include_ground" value="false"/>
+  </node>
+
+  <include if="$(arg launch_rviz)" file="$(find exploration_manager)/launch/rviz.launch"/>
+</launch>

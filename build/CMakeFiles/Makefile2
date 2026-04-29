@@ -10492,18 +10492,73 @@ RACER/swarm_exploration/plan_manage/CMakeFiles/fast_planner_node.dir/clean:
 # Target rules for target RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir
 
 # All Build rule for target.
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: mav_comm/mav_state_machine_msgs/CMakeFiles/std_msgs_generate_messages_cpp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: mav_comm/mav_state_machine_msgs/CMakeFiles/std_msgs_generate_messages_eus.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: mav_comm/mav_state_machine_msgs/CMakeFiles/std_msgs_generate_messages_lisp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: mav_comm/mav_state_machine_msgs/CMakeFiles/std_msgs_generate_messages_nodejs.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: mav_comm/mav_state_machine_msgs/CMakeFiles/std_msgs_generate_messages_py.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/quadrotor_msgs_generate_messages_py.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/quadrotor_msgs_generate_messages_lisp.dir/all
 RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/decode_msgs.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/quadrotor_msgs_generate_messages_eus.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/quadrotor_msgs_generate_messages_cpp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/roscpp_generate_messages_cpp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/rosgraph_msgs_generate_messages_py.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/roscpp_generate_messages_lisp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/geometry_msgs_generate_messages_cpp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/geometry_msgs_generate_messages_nodejs.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/rosgraph_msgs_generate_messages_eus.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/roscpp_generate_messages_nodejs.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/geometry_msgs_generate_messages_lisp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/roscpp_generate_messages_py.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/roscpp_generate_messages_eus.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/rosgraph_msgs_generate_messages_lisp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/geometry_msgs_generate_messages_py.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/geometry_msgs_generate_messages_eus.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/rosgraph_msgs_generate_messages_nodejs.dir/all
 RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/encode_msgs.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/quadrotor_msgs_generate_messages_nodejs.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/gazebo_map_generator/CMakeFiles/sensor_msgs_generate_messages_cpp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/gazebo_map_generator/CMakeFiles/sensor_msgs_generate_messages_eus.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/gazebo_map_generator/CMakeFiles/sensor_msgs_generate_messages_lisp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/gazebo_map_generator/CMakeFiles/sensor_msgs_generate_messages_nodejs.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/gazebo_map_generator/CMakeFiles/sensor_msgs_generate_messages_py.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/utils/lkh_mtsp_solver/CMakeFiles/lkh_mtsp_solver_generate_messages_py.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/utils/lkh_mtsp_solver/CMakeFiles/lkh_mtsp_solver_generate_messages_cpp.dir/all
 RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/utils/lkh_mtsp_solver/CMakeFiles/lkh_mtsp_solver.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/utils/lkh_mtsp_solver/CMakeFiles/lkh_mtsp_solver_generate_messages_eus.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/utils/lkh_mtsp_solver/CMakeFiles/lkh_mtsp_solver_generate_messages_lisp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/utils/lkh_mtsp_solver/CMakeFiles/lkh_mtsp_solver_generate_messages_nodejs.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/utils/lkh_tsp_solver/CMakeFiles/lkh_tsp_solver_generate_messages_nodejs.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/utils/lkh_tsp_solver/CMakeFiles/lkh_tsp_solver_generate_messages_eus.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/utils/lkh_tsp_solver/CMakeFiles/lkh_tsp_solver_generate_messages_py.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/utils/lkh_tsp_solver/CMakeFiles/lkh_tsp_solver_generate_messages_cpp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/utils/lkh_tsp_solver/CMakeFiles/lkh_tsp_solver_generate_messages_lisp.dir/all
 RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/utils/lkh_tsp_solver/CMakeFiles/lkh_tsp_solver.dir/all
 RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/plan_env/CMakeFiles/plan_env.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/plan_env/CMakeFiles/plan_env_generate_messages_py.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/plan_env/CMakeFiles/plan_env_generate_messages_lisp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/plan_env/CMakeFiles/plan_env_generate_messages_cpp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/plan_env/CMakeFiles/plan_env_generate_messages_eus.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/plan_env/CMakeFiles/plan_env_generate_messages_nodejs.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/bspline/CMakeFiles/bspline_generate_messages_cpp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/bspline/CMakeFiles/bspline_generate_messages_py.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/bspline/CMakeFiles/bspline_generate_messages_eus.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/bspline/CMakeFiles/bspline_generate_messages_lisp.dir/all
 RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/bspline/CMakeFiles/bspline.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/bspline/CMakeFiles/bspline_generate_messages_nodejs.dir/all
 RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/path_searching/CMakeFiles/path_searching.dir/all
 RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/active_perception/CMakeFiles/active_perception.dir/all
 RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/bspline_opt/CMakeFiles/bspline_opt.dir/all
 RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/poly_traj/CMakeFiles/poly_traj.dir/all
 RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/traj_utils/CMakeFiles/traj_utils.dir/all
 RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/plan_manage/CMakeFiles/plan_manage.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_manager_generate_messages_py.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_manager_generate_messages_lisp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_manager_generate_messages_cpp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_manager_generate_messages_eus.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all: RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_manager_generate_messages_nodejs.dir/all
 	$(MAKE) -f RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/build.make RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/depend
 	$(MAKE) -f RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/build.make RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/jacob/racer_ws/build/CMakeFiles --progress-num=6 "Built target exploration_node"
@@ -10511,7 +10566,7 @@ RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all:
 
 # Build rule for subdir invocation for target.
 RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/jacob/racer_ws/build/CMakeFiles 36
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/jacob/racer_ws/build/CMakeFiles 46
 	$(MAKE) -f CMakeFiles/Makefile2 RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/jacob/racer_ws/build/CMakeFiles 0
 .PHONY : RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/rule
@@ -10530,18 +10585,73 @@ RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/clea
 # Target rules for target RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir
 
 # All Build rule for target.
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: mav_comm/mav_state_machine_msgs/CMakeFiles/std_msgs_generate_messages_cpp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: mav_comm/mav_state_machine_msgs/CMakeFiles/std_msgs_generate_messages_eus.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: mav_comm/mav_state_machine_msgs/CMakeFiles/std_msgs_generate_messages_lisp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: mav_comm/mav_state_machine_msgs/CMakeFiles/std_msgs_generate_messages_nodejs.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: mav_comm/mav_state_machine_msgs/CMakeFiles/std_msgs_generate_messages_py.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/quadrotor_msgs_generate_messages_py.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/quadrotor_msgs_generate_messages_lisp.dir/all
 RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/decode_msgs.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/quadrotor_msgs_generate_messages_eus.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/quadrotor_msgs_generate_messages_cpp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/roscpp_generate_messages_cpp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/rosgraph_msgs_generate_messages_py.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/roscpp_generate_messages_lisp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/geometry_msgs_generate_messages_cpp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/geometry_msgs_generate_messages_nodejs.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/rosgraph_msgs_generate_messages_eus.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/roscpp_generate_messages_nodejs.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/geometry_msgs_generate_messages_lisp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/roscpp_generate_messages_py.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/roscpp_generate_messages_eus.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/rosgraph_msgs_generate_messages_lisp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/geometry_msgs_generate_messages_py.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/geometry_msgs_generate_messages_eus.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/rosgraph_msgs_generate_messages_nodejs.dir/all
 RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/encode_msgs.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/uav_simulator/Utils/quadrotor_msgs/CMakeFiles/quadrotor_msgs_generate_messages_nodejs.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/gazebo_map_generator/CMakeFiles/sensor_msgs_generate_messages_cpp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/gazebo_map_generator/CMakeFiles/sensor_msgs_generate_messages_eus.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/gazebo_map_generator/CMakeFiles/sensor_msgs_generate_messages_lisp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/gazebo_map_generator/CMakeFiles/sensor_msgs_generate_messages_nodejs.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/gazebo_map_generator/CMakeFiles/sensor_msgs_generate_messages_py.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/utils/lkh_mtsp_solver/CMakeFiles/lkh_mtsp_solver_generate_messages_py.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/utils/lkh_mtsp_solver/CMakeFiles/lkh_mtsp_solver_generate_messages_cpp.dir/all
 RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/utils/lkh_mtsp_solver/CMakeFiles/lkh_mtsp_solver.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/utils/lkh_mtsp_solver/CMakeFiles/lkh_mtsp_solver_generate_messages_eus.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/utils/lkh_mtsp_solver/CMakeFiles/lkh_mtsp_solver_generate_messages_lisp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/utils/lkh_mtsp_solver/CMakeFiles/lkh_mtsp_solver_generate_messages_nodejs.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/utils/lkh_tsp_solver/CMakeFiles/lkh_tsp_solver_generate_messages_nodejs.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/utils/lkh_tsp_solver/CMakeFiles/lkh_tsp_solver_generate_messages_eus.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/utils/lkh_tsp_solver/CMakeFiles/lkh_tsp_solver_generate_messages_py.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/utils/lkh_tsp_solver/CMakeFiles/lkh_tsp_solver_generate_messages_cpp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/utils/lkh_tsp_solver/CMakeFiles/lkh_tsp_solver_generate_messages_lisp.dir/all
 RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/utils/lkh_tsp_solver/CMakeFiles/lkh_tsp_solver.dir/all
 RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/plan_env/CMakeFiles/plan_env.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/plan_env/CMakeFiles/plan_env_generate_messages_py.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/plan_env/CMakeFiles/plan_env_generate_messages_lisp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/plan_env/CMakeFiles/plan_env_generate_messages_cpp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/plan_env/CMakeFiles/plan_env_generate_messages_eus.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/plan_env/CMakeFiles/plan_env_generate_messages_nodejs.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/bspline/CMakeFiles/bspline_generate_messages_cpp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/bspline/CMakeFiles/bspline_generate_messages_py.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/bspline/CMakeFiles/bspline_generate_messages_eus.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/bspline/CMakeFiles/bspline_generate_messages_lisp.dir/all
 RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/bspline/CMakeFiles/bspline.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/bspline/CMakeFiles/bspline_generate_messages_nodejs.dir/all
 RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/path_searching/CMakeFiles/path_searching.dir/all
 RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/active_perception/CMakeFiles/active_perception.dir/all
 RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/bspline_opt/CMakeFiles/bspline_opt.dir/all
 RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/poly_traj/CMakeFiles/poly_traj.dir/all
 RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/traj_utils/CMakeFiles/traj_utils.dir/all
 RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/plan_manage/CMakeFiles/plan_manage.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_manager_generate_messages_py.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_manager_generate_messages_lisp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_manager_generate_messages_cpp.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_manager_generate_messages_eus.dir/all
+RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_manager_generate_messages_nodejs.dir/all
 	$(MAKE) -f RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/build.make RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/depend
 	$(MAKE) -f RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/build.make RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/jacob/racer_ws/build/CMakeFiles --progress-num=8 "Built target ground_node"
@@ -10549,7 +10659,7 @@ RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all: RACE
 
 # Build rule for subdir invocation for target.
 RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/jacob/racer_ws/build/CMakeFiles 36
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/jacob/racer_ws/build/CMakeFiles 46
 	$(MAKE) -f CMakeFiles/Makefile2 RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/jacob/racer_ws/build/CMakeFiles 0
 .PHONY : RACER/swarm_exploration/exploration_manager/CMakeFiles/ground_node.dir/rule
