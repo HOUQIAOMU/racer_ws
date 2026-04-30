@@ -357,6 +357,7 @@ RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/src/
 RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/src/exploration_node.cpp.o: /usr/include/eigen3/Eigen/src/plugins/MatrixCwiseBinaryOps.h
 RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/src/exploration_node.cpp.o: /usr/include/eigen3/Eigen/src/plugins/MatrixCwiseUnaryOps.h
 
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/src/fast_exploration_fsm.cpp.o: /home/jacob/racer_ws/devel/include/bspline/Bspline.h
 RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/src/fast_exploration_fsm.cpp.o: /home/jacob/racer_ws/devel/include/exploration_manager/DroneState.h
 RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/src/fast_exploration_fsm.cpp.o: /home/jacob/racer_ws/devel/include/exploration_manager/GridTour.h
 RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/src/fast_exploration_fsm.cpp.o: /home/jacob/racer_ws/devel/include/exploration_manager/HGrid.h
@@ -789,6 +790,13 @@ RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/src/
 RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/src/fast_exploration_fsm.cpp.o: /usr/include/pcl-1.10/pcl/point_types.h
 RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/src/fast_exploration_fsm.cpp.o: /usr/include/pcl-1.10/pcl/register_point_struct.h
 
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/src/fast_exploration_manager.cpp.o: /home/jacob/racer_ws/devel/include/bspline/Bspline.h
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/src/fast_exploration_manager.cpp.o: /home/jacob/racer_ws/devel/include/lkh_mtsp_solver/SolveMTSP.h
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/src/fast_exploration_manager.cpp.o: /home/jacob/racer_ws/devel/include/lkh_mtsp_solver/SolveMTSPRequest.h
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/src/fast_exploration_manager.cpp.o: /home/jacob/racer_ws/devel/include/lkh_mtsp_solver/SolveMTSPResponse.h
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/src/fast_exploration_manager.cpp.o: /home/jacob/racer_ws/devel/include/lkh_tsp_solver/SolveTSP.h
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/src/fast_exploration_manager.cpp.o: /home/jacob/racer_ws/devel/include/lkh_tsp_solver/SolveTSPRequest.h
+RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/src/fast_exploration_manager.cpp.o: /home/jacob/racer_ws/devel/include/lkh_tsp_solver/SolveTSPResponse.h
 RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/src/fast_exploration_manager.cpp.o: /home/jacob/racer_ws/src/RACER/swarm_exploration/active_perception/include/active_perception/frontier_finder.h
 RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/src/fast_exploration_manager.cpp.o: /home/jacob/racer_ws/src/RACER/swarm_exploration/active_perception/include/active_perception/graph_node.h
 RACER/swarm_exploration/exploration_manager/CMakeFiles/exploration_node.dir/src/fast_exploration_manager.cpp.o: /home/jacob/racer_ws/src/RACER/swarm_exploration/active_perception/include/active_perception/graph_search.h

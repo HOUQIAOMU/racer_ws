@@ -312,6 +312,7 @@
         <transformTopic>${transform_topic}</transformTopic>
         <odometryTopic>${odometry_topic}</odometryTopic>
         <parentFrameId>${parent_frame_id}</parentFrameId>  <!-- Use the scoped link name here. e.g. Model::link. -->
+        <childFrameId>${namespace}/odometry_sensor${odometry_sensor_suffix}_link</childFrameId>
         <measurementDivisor>${measurement_divisor}</measurementDivisor> <!-- only every (seq % measurementDivisor) == 0 measurement is published [int] -->
         <measurementDelay>${measurement_delay}</measurementDelay> <!-- time that measurement gets held back before it's published in [simulation cycles (int)] -->
         <unknownDelay>${unknown_delay}</unknownDelay> <!-- additional delay, that just gets added to the timestamp [s] -->
@@ -400,7 +401,7 @@
     <!-- Optical center of camera -->
     <link name="${namespace}/camera_${camera_suffix}_optical_center_link" />
     <joint name="${namespace}/camera_${camera_suffix}_optical_center_joint" type="fixed">
-      <origin xyz="0 0 0" rpy="${-PI/2} 0 ${-PI/2}" />
+      <origin xyz="0 0 0" rpy="-1.57079632679 0 -1.57079632679" />
       <parent link="${namespace}/camera_${camera_suffix}_link" />
       <child link="${namespace}/camera_${camera_suffix}_optical_center_link" />
       <limit upper="0" lower="0" effort="0" velocity="0" />
@@ -426,7 +427,7 @@
           <alwaysOn>true</alwaysOn>
           <baseline>0.11</baseline>
           <updateRate>${frame_rate}</updateRate>
-          <cameraName>camera_${camera_suffix}</cameraName>
+          <cameraName></cameraName>
           <imageTopicName>camera/image_raw</imageTopicName>
           <cameraInfoTopicName>camera/camera_info</cameraInfoTopicName>
           <depthImageTopicName>depth/disparity</depthImageTopicName>

@@ -18,6 +18,7 @@
   <arg name="max_acc"/>
   <arg name="simulation" default="true"/>
   <arg name="single_expo" default="false"/>
+  <arg name="map_frame" default="world"/>
 
   <!-- main node -->
   <node pkg="exploration_manager" name="exploration_node_$(arg drone_id)" type="exploration_node" output="log">
@@ -26,9 +27,9 @@
     <remap from ="/map_ros/depth" to = "$(arg depth_topic)"/>
     <remap from ="/map_ros/cloud" to="$(arg cloud_topic)"/>
 
-    <remap from="/planning/replan" to="/planning/replan_$(arg drone_id)" />
-    <remap from="/planning/new" to="/planning/new_$(arg drone_id)" />
-    <remap from="/planning/bspline" to="/planning/bspline_$(arg drone_id)" />
+    <remap from="/planning/replan" to="planning/replan" />
+    <remap from="/planning/new" to="planning/new" />
+    <remap from="/planning/bspline" to="planning/bspline" />
 
     <remap from="/swarm_expl/drone_state_send" to="/swarm_expl/drone_state" />
     <remap from="/swarm_expl/drone_state_recv" to="/swarm_expl/drone_state" />
@@ -62,7 +63,7 @@
     <param name="sdf_map/map_size_x"   value="$(arg map_size_x)" /> 
     <param name="sdf_map/map_size_y"   value="$(arg map_size_y)" /> 
     <param name="sdf_map/map_size_z"   value="$(arg map_size_z)" /> 
-    <param name="sdf_map/obstacles_inflation"     value="0.199" /> 
+    <param name="sdf_map/obstacles_inflation"     value="0.4" />
     <!-- <param name="sdf_map/obstacles_inflation"     value="0.0" />  -->
     <param name="sdf_map/local_bound_inflate"    value="0.5"/>
     <param name="sdf_map/local_map_margin" value="50"/>
@@ -108,7 +109,7 @@
     <param name="map_ros/show_occ_time"  value="false"/>
     <param name="map_ros/show_esdf_time" value="false"/>
     <param name="map_ros/show_all_map" value="true"/>
-    <param name="map_ros/frame_id"      value="world"/>
+    <param name="map_ros/frame_id"      value="$(arg map_frame)"/>
 
     <!-- Fsm -->
     <param name="fsm/thresh_replan1" value="0.2" type="double"/>
@@ -122,8 +123,8 @@
     <param name="fsm/wait_delete_duration" value="0.05" type="double"/>
     <param name="fsm/gain_thresh" value="10" type="int"/>
 
-    <param name="fsm/attempt_interval" value="0.1" type="double"/>
-    <param name="fsm/pair_opt_interval" value="0.5" type="double"/>
+    <param name="fsm/attempt_interval" value="0.4" type="double"/>
+    <param name="fsm/pair_opt_interval" value="2.0" type="double"/>
 
     <param name="partitioning/min_unknown" value="4000" type="int"/>;
     <param name="partitioning/min_frontier" value="100" type="int"/>;
@@ -152,12 +153,13 @@
     <param name="exploration/drone_num" value="$(arg drone_num)" type="double"/>
     <param name="exploration/drone_id" value="$(arg drone_id)" type="int"/>
     <param name="exploration/init_plan_num" value="2" type="int"/>
+    <param name="exploration/optimistic_search" value="true" type="bool"/>
 
     <param name="frontier/cluster_min" value="100" type="int"/>
     <param name="frontier/cluster_size_xy" value="2.0" type="double"/>
     <param name="frontier/cluster_size_z" value="10.0" type="double"/>
     <param name="frontier/min_candidate_dist" value="0.5" type="double"/>
-    <param name="frontier/min_candidate_clearance" value="0.21" type="double"/>
+    <param name="frontier/min_candidate_clearance" value="0.4" type="double"/>
     <param name="frontier/candidate_dphi" value="$(eval 15 * 3.1415926 / 180.0)" type="double"/>
     <param name="frontier/candidate_rnum" value="3" type="int"/>
     <param name="frontier/candidate_rmin" value="1.0" type="double"/>
@@ -190,7 +192,7 @@
     <param name="manager/max_jerk" value="4" type="double"/>
     <param name="manager/dynamic_environment" value="0" type="int"/>
     <param name="manager/local_segment_length" value="6.0" type="double"/>
-    <param name="manager/clearance_threshold" value="0.2" type="double"/>
+    <param name="manager/clearance_threshold" value="0.4" type="double"/>
     <param name="manager/control_points_distance" value="0.5" type="double"/>
     <param name="manager/use_geometric_path" value="true" type="bool"/>
     <param name="manager/use_kinodynamic_path" value="true" type="bool"/>
@@ -216,12 +218,12 @@
     <param name="search/margin" value="0.2" type="double"/>
     <param name="search/allocate_num" value="100000" type="int"/>
     <param name="search/check_num" value="10" type="int"/>
-    <param name="search/optimistic" value="false" type="bool"/>
+    <param name="search/optimistic" value="true" type="bool"/>
 
     <param name="astar/lambda_heu" value="10000.0" type="double"/>
     <param name="astar/resolution_astar" value="0.3" type="double"/>
     <param name="astar/allocate_num" value="1000000" type="int"/>
-    <param name="astar/max_search_time" value="0.001" type="double"/>
+    <param name="astar/max_search_time" value="0.02" type="double"/>
 
   <!-- trajectory optimization -->
     <param name="optimization/ld_smooth" value="5.0" type="double"/>

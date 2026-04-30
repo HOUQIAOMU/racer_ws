@@ -83,5 +83,10 @@ target_link_libraries(ground_node
 
 catkin_install_python(PROGRAMS
   scripts/world_cloud_publisher.py
+  scripts/odom_tf_broadcaster.py
+  scripts/sensor_pose_from_tf.py
+  scripts/poscmd_to_mav_trajectory.py
+  scripts/takeoff_hover_until_poscmd.py
+  scripts/pointcloud_downsample.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

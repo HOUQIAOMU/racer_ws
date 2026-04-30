@@ -1,0 +1,161 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="namespace"/>
+  <arg name="drone_id"/>
+  <arg name="drone_num" default="4"/>
+  <arg name="mav_name" default="iris"/>
+
+  <arg name="x" default="0.0"/>
+  <arg name="y" default="0.0"/>
+  <arg name="z" default="0.6"/>
+  <arg name="roll" default="0.0"/>
+  <arg name="pitch" default="0.0"/>
+  <arg name="yaw" default="0.0"/>
+
+  <arg name="map_frame" default="world"/>
+  <arg name="map_size_x" default="22"/>
+  <arg name="map_size_y" default="22"/>
+  <arg name="map_size_z" default="3.5"/>
+  <arg name="cx" default="320.0"/>
+  <arg name="cy" default="240.0"/>
+  <arg name="fx" default="320.0"/>
+  <arg name="fy" default="320.0"/>
+
+  <arg name="start_odom_visualization" default="true"/>
+  <arg name="enable_takeoff_hover" default="true"/>
+  <arg name="takeoff_hover_z" default="1.0"/>
+  <arg name="unpause" default="false"/>
+  <arg name="spawn_delay" default="0.0"/>
+  <arg name="unpause_delay" default="0.0"/>
+  <arg name="enable_racer" default="true"/>
+  <arg name="enable_control_bridge" default="true"/>
+  <arg name="cloud_downsample_stride" default="60"/>
+  <arg name="cloud_downsample_max_points" default="5000"/>
+  <arg name="max_vel" default="1.0"/>
+  <arg name="max_acc" default="0.8"/>
+
+  <include file="$(find exploration_manager)/launch/uav_simulation.launch">
+    <arg name="mav_name" value="$(arg mav_name)"/>
+    <arg name="namespace" value="$(arg namespace)"/>
+    <arg name="drone_id" value="$(arg drone_id)"/>
+    <arg name="drone_num" value="$(arg drone_num)"/>
+    <arg name="x" value="$(arg x)"/>
+    <arg name="y" value="$(arg y)"/>
+    <arg name="z" value="$(arg z)"/>
+    <arg name="roll" value="$(arg roll)"/>
+    <arg name="pitch" value="$(arg pitch)"/>
+    <arg name="yaw" value="$(arg yaw)"/>
+    <arg name="odometry_topic" value="odom"/>
+    <arg name="start_hover" value="false"/>
+    <arg name="start_odom_visualization" value="$(arg start_odom_visualization)"/>
+    <arg name="relay_to_racer_odom" value="false"/>
+    <arg name="unpause" value="$(arg unpause)"/>
+    <arg name="spawn_delay" value="$(arg spawn_delay)"/>
+    <arg name="unpause_delay" value="$(arg unpause_delay)"/>
+  </include>
+
+  <node name="$(arg namespace)_ground_truth_odom_relay"
+        pkg="topic_tools"
+        type="relay"
+        args="/$(arg namespace)/ground_truth/odometry /$(arg namespace)/odom"
+        output="log"/>
+
+  <node name="$(arg namespace)_depth_points_relay"
+        pkg="topic_tools"
+        type="relay"
+        args="/$(arg namespace)/camera_depth/depth/points /$(arg namespace)/depth/points"
+        output="log"/>
+
+  <node name="$(arg namespace)_depth_disparity_relay"
+        pkg="topic_tools"
+        type="relay"
+        args="/$(arg namespace)/camera_depth/depth/disparity /$(arg namespace)/depth/disparity"
+        output="log"/>
+
+  <node name="$(arg namespace)_pointcloud_downsample"
+        pkg="exploration_manager"
+        type="pointcloud_downsample.py"
+        output="screen">
+    <param name="input_topic" value="/$(arg namespace)/depth/points"/>
+    <param name="output_topic" value="/$(arg namespace)/depth/points_world"/>
+    <param name="target_frame" value="$(arg map_frame)"/>
+    <param name="stride" value="$(arg cloud_downsample_stride)"/>
+    <param name="max_points" value="$(arg cloud_downsample_max_points)"/>
+  </node>
+
+  <node name="$(arg namespace)_map_to_odom_tf"
+        pkg="tf"
+        type="static_transform_publisher"
+        args="0 0 0 0 0 0 $(arg map_frame) $(arg namespace)/odom 100"/>
+
+  <group ns="$(arg namespace)">
+    <node name="odom_tf_broadcaster"
+          pkg="exploration_manager"
+          type="odom_tf_broadcaster.py"
+          output="screen">
+      <param name="odom_topic" value="/$(arg namespace)/odom"/>
+      <param name="parent_frame" value="$(arg namespace)/odom"/>
+      <param name="child_frame" value="$(arg namespace)/base_link"/>
+    </node>
+
+    <node name="sensor_pose_from_tf"
+          pkg="exploration_manager"
+          type="sensor_pose_from_tf.py"
+          output="screen">
+      <param name="map_frame" value="$(arg map_frame)"/>
+      <param name="sensor_frame" value="$(arg namespace)/camera_depth_optical_center_link"/>
+      <param name="pose_topic" value="sensor_pose"/>
+      <param name="reference_topic" value="/$(arg namespace)/depth/points_world"/>
+      <param name="publish_rate" value="30.0"/>
+    </node>
+
+    <node if="$(arg enable_takeoff_hover)"
+          name="takeoff_hover_until_poscmd"
+          pkg="exploration_manager"
+          type="takeoff_hover_until_poscmd.py"
+          output="screen">
+      <param name="output_topic" value="command/trajectory"/>
+      <param name="poscmd_topic" value="planning/pos_cmd"/>
+      <param name="frame_id" value="$(arg map_frame)"/>
+      <param name="x" value="$(arg x)"/>
+      <param name="y" value="$(arg y)"/>
+      <param name="z" value="$(arg takeoff_hover_z)"/>
+      <param name="yaw" value="$(arg yaw)"/>
+      <param name="publish_rate" value="10.0"/>
+    </node>
+
+    <include if="$(arg enable_racer)" file="$(find exploration_manager)/launch/single_drone_exploration.xml">
+      <arg name="drone_id" value="$(arg drone_id)"/>
+      <arg name="drone_num" value="$(arg drone_num)"/>
+      <arg name="init_x" value="$(arg x)"/>
+      <arg name="init_y" value="$(arg y)"/>
+      <arg name="init_z" value="$(arg z)"/>
+      <arg name="map_size_x" value="$(arg map_size_x)"/>
+      <arg name="map_size_y" value="$(arg map_size_y)"/>
+      <arg name="map_size_z" value="$(arg map_size_z)"/>
+      <arg name="simulation" value="false"/>
+      <arg name="odometry_topic" value="/$(arg namespace)/odom"/>
+      <arg name="sensor_pose_topic" value="/$(arg namespace)/sensor_pose"/>
+      <arg name="depth_topic" value="/$(arg namespace)/depth/disabled"/>
+      <arg name="cloud_topic" value="/$(arg namespace)/depth/points_world"/>
+      <arg name="position_cmd_topic" value="planning/pos_cmd"/>
+      <arg name="map_frame" value="$(arg map_frame)"/>
+      <arg name="max_vel" value="$(arg max_vel)"/>
+      <arg name="max_acc" value="$(arg max_acc)"/>
+      <arg name="cx" value="$(arg cx)"/>
+      <arg name="cy" value="$(arg cy)"/>
+      <arg name="fx" value="$(arg fx)"/>
+      <arg name="fy" value="$(arg fy)"/>
+    </include>
+
+    <node if="$(arg enable_control_bridge)"
+          name="poscmd_to_mav_trajectory"
+          pkg="exploration_manager"
+          type="poscmd_to_mav_trajectory.py"
+          output="screen">
+      <param name="input_topic" value="planning/pos_cmd"/>
+      <param name="output_topic" value="command/trajectory"/>
+      <param name="frame_id" value="$(arg map_frame)"/>
+    </node>
+  </group>
+</launch>

@@ -612,8 +612,11 @@ void FastExplorationFSM::triggerCallback(const geometry_msgs::PoseStampedConstPt
 
   if (expl_manager_->updateFrontierStruct(fd_->odom_pos_) != 0) {
     transitState(PLAN_TRAJ, "triggerCallback");
-  } else
+  } else if (expl_manager_->ep_->drone_num_ > 1) {
+    transitState(IDLE, "triggerCallback");
+  } else {
     transitState(FINISH, "triggerCallback");
+  }
 }
 
 void FastExplorationFSM::safetyCallback(const ros::TimerEvent& e) {
@@ -912,7 +915,7 @@ void FastExplorationFSM::optMsgCallback(const exploration_manager::PairOptConstP
     state2.recent_attempt_time_ = ros::Time::now().toSec();
     expl_manager_->ed_->reallocated_ = true;
 
-    if (state_ == IDLE && !state2.grid_ids_.empty()) {
+    if ((state_ == IDLE || state_ == FINISH) && !state2.grid_ids_.empty()) {
       transitState(PLAN_TRAJ, "optMsgCallback");
       ROS_WARN("Restart after opt!");
     }
@@ -950,7 +953,7 @@ void FastExplorationFSM::optResMsgCallback(
   state2.recent_interact_time_ = ros::Time::now().toSec();
   ed->reallocated_ = true;
 
-  if (state_ == IDLE && !state1.grid_ids_.empty()) {
+  if ((state_ == IDLE || state_ == FINISH) && !state1.grid_ids_.empty()) {
     transitState(PLAN_TRAJ, "optResMsgCallback");
     ROS_WARN("Restart after opt!");
   }

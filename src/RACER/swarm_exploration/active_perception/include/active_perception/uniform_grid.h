@@ -98,6 +98,7 @@ private:
   int level_;
 
   int min_unknown_, min_frontier_, min_free_;
+  int drone_num_;
   double consistent_cost_, inside_ratio_;
   double w_unknown_;
 

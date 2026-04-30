@@ -75,13 +75,13 @@ mav_comm/mav_planning_msgs/CMakeFiles/mav_planning_msgs_generate_messages_cpp: /
 
 /home/jacob/racer_ws/devel/include/mav_planning_msgs/PointCloudWithPose.h: /opt/ros/noetic/lib/gencpp/gen_cpp.py
 /home/jacob/racer_ws/devel/include/mav_planning_msgs/PointCloudWithPose.h: /home/jacob/racer_ws/src/mav_comm/mav_planning_msgs/msg/PointCloudWithPose.msg
-/home/jacob/racer_ws/devel/include/mav_planning_msgs/PointCloudWithPose.h: /opt/ros/noetic/share/sensor_msgs/msg/PointCloud2.msg
 /home/jacob/racer_ws/devel/include/mav_planning_msgs/PointCloudWithPose.h: /opt/ros/noetic/share/std_msgs/msg/Header.msg
-/home/jacob/racer_ws/devel/include/mav_planning_msgs/PointCloudWithPose.h: /opt/ros/noetic/share/geometry_msgs/msg/Vector3.msg
-/home/jacob/racer_ws/devel/include/mav_planning_msgs/PointCloudWithPose.h: /opt/ros/noetic/share/sensor_msgs/msg/PointField.msg
 /home/jacob/racer_ws/devel/include/mav_planning_msgs/PointCloudWithPose.h: /opt/ros/noetic/share/geometry_msgs/msg/Quaternion.msg
-/home/jacob/racer_ws/devel/include/mav_planning_msgs/PointCloudWithPose.h: /opt/ros/noetic/share/geometry_msgs/msg/TransformStamped.msg
 /home/jacob/racer_ws/devel/include/mav_planning_msgs/PointCloudWithPose.h: /opt/ros/noetic/share/geometry_msgs/msg/Transform.msg
+/home/jacob/racer_ws/devel/include/mav_planning_msgs/PointCloudWithPose.h: /opt/ros/noetic/share/geometry_msgs/msg/Vector3.msg
+/home/jacob/racer_ws/devel/include/mav_planning_msgs/PointCloudWithPose.h: /opt/ros/noetic/share/sensor_msgs/msg/PointCloud2.msg
+/home/jacob/racer_ws/devel/include/mav_planning_msgs/PointCloudWithPose.h: /opt/ros/noetic/share/sensor_msgs/msg/PointField.msg
+/home/jacob/racer_ws/devel/include/mav_planning_msgs/PointCloudWithPose.h: /opt/ros/noetic/share/geometry_msgs/msg/TransformStamped.msg
 /home/jacob/racer_ws/devel/include/mav_planning_msgs/PointCloudWithPose.h: /opt/ros/noetic/share/gencpp/msg.h.template
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/jacob/racer_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Generating C++ code from mav_planning_msgs/PointCloudWithPose.msg"
 	cd /home/jacob/racer_ws/src/mav_comm/mav_planning_msgs && /home/jacob/racer_ws/build/catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/gencpp/cmake/../../../lib/gencpp/gen_cpp.py /home/jacob/racer_ws/src/mav_comm/mav_planning_msgs/msg/PointCloudWithPose.msg -Imav_planning_msgs:/home/jacob/racer_ws/src/mav_comm/mav_planning_msgs/msg -Igeometry_msgs:/opt/ros/noetic/share/geometry_msgs/cmake/../msg -Isensor_msgs:/opt/ros/noetic/share/sensor_msgs/cmake/../msg -Istd_msgs:/opt/ros/noetic/share/std_msgs/cmake/../msg -Imav_msgs:/home/jacob/racer_ws/src/mav_comm/mav_msgs/msg -Itrajectory_msgs:/opt/ros/noetic/share/trajectory_msgs/cmake/../msg -Inav_msgs:/opt/ros/noetic/share/nav_msgs/cmake/../msg -Iactionlib_msgs:/opt/ros/noetic/share/actionlib_msgs/cmake/../msg -p mav_planning_msgs -o /home/jacob/racer_ws/devel/include/mav_planning_msgs -e /opt/ros/noetic/share/gencpp/cmake/..
@@ -104,9 +104,9 @@ mav_comm/mav_planning_msgs/CMakeFiles/mav_planning_msgs_generate_messages_cpp: /
 /home/jacob/racer_ws/devel/include/mav_planning_msgs/PolygonWithHolesStamped.h: /opt/ros/noetic/lib/gencpp/gen_cpp.py
 /home/jacob/racer_ws/devel/include/mav_planning_msgs/PolygonWithHolesStamped.h: /home/jacob/racer_ws/src/mav_comm/mav_planning_msgs/msg/PolygonWithHolesStamped.msg
 /home/jacob/racer_ws/devel/include/mav_planning_msgs/PolygonWithHolesStamped.h: /opt/ros/noetic/share/std_msgs/msg/Header.msg
-/home/jacob/racer_ws/devel/include/mav_planning_msgs/PolygonWithHolesStamped.h: /home/jacob/racer_ws/src/mav_comm/mav_planning_msgs/msg/Point2D.msg
-/home/jacob/racer_ws/devel/include/mav_planning_msgs/PolygonWithHolesStamped.h: /home/jacob/racer_ws/src/mav_comm/mav_planning_msgs/msg/Polygon2D.msg
 /home/jacob/racer_ws/devel/include/mav_planning_msgs/PolygonWithHolesStamped.h: /home/jacob/racer_ws/src/mav_comm/mav_planning_msgs/msg/PolygonWithHoles.msg
+/home/jacob/racer_ws/devel/include/mav_planning_msgs/PolygonWithHolesStamped.h: /home/jacob/racer_ws/src/mav_comm/mav_planning_msgs/msg/Polygon2D.msg
+/home/jacob/racer_ws/devel/include/mav_planning_msgs/PolygonWithHolesStamped.h: /home/jacob/racer_ws/src/mav_comm/mav_planning_msgs/msg/Point2D.msg
 /home/jacob/racer_ws/devel/include/mav_planning_msgs/PolygonWithHolesStamped.h: /opt/ros/noetic/share/gencpp/msg.h.template
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/jacob/racer_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Generating C++ code from mav_planning_msgs/PolygonWithHolesStamped.msg"
 	cd /home/jacob/racer_ws/src/mav_comm/mav_planning_msgs && /home/jacob/racer_ws/build/catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/gencpp/cmake/../../../lib/gencpp/gen_cpp.py /home/jacob/racer_ws/src/mav_comm/mav_planning_msgs/msg/PolygonWithHolesStamped.msg -Imav_planning_msgs:/home/jacob/racer_ws/src/mav_comm/mav_planning_msgs/msg -Igeometry_msgs:/opt/ros/noetic/share/geometry_msgs/cmake/../msg -Isensor_msgs:/opt/ros/noetic/share/sensor_msgs/cmake/../msg -Istd_msgs:/opt/ros/noetic/share/std_msgs/cmake/../msg -Imav_msgs:/home/jacob/racer_ws/src/mav_comm/mav_msgs/msg -Itrajectory_msgs:/opt/ros/noetic/share/trajectory_msgs/cmake/../msg -Inav_msgs:/opt/ros/noetic/share/nav_msgs/cmake/../msg -Iactionlib_msgs:/opt/ros/noetic/share/actionlib_msgs/cmake/../msg -p mav_planning_msgs -o /home/jacob/racer_ws/devel/include/mav_planning_msgs -e /opt/ros/noetic/share/gencpp/cmake/..
@@ -143,20 +143,20 @@ mav_comm/mav_planning_msgs/CMakeFiles/mav_planning_msgs_generate_messages_cpp: /
 
 /home/jacob/racer_ws/devel/include/mav_planning_msgs/PlannerService.h: /opt/ros/noetic/lib/gencpp/gen_cpp.py
 /home/jacob/racer_ws/devel/include/mav_planning_msgs/PlannerService.h: /home/jacob/racer_ws/src/mav_comm/mav_planning_msgs/srv/PlannerService.srv
-/home/jacob/racer_ws/devel/include/mav_planning_msgs/PlannerService.h: /opt/ros/noetic/share/trajectory_msgs/msg/MultiDOFJointTrajectoryPoint.msg
 /home/jacob/racer_ws/devel/include/mav_planning_msgs/PlannerService.h: /opt/ros/noetic/share/std_msgs/msg/Header.msg
+/home/jacob/racer_ws/devel/include/mav_planning_msgs/PlannerService.h: /opt/ros/noetic/share/geometry_msgs/msg/Quaternion.msg
+/home/jacob/racer_ws/devel/include/mav_planning_msgs/PlannerService.h: /opt/ros/noetic/share/geometry_msgs/msg/Transform.msg
+/home/jacob/racer_ws/devel/include/mav_planning_msgs/PlannerService.h: /opt/ros/noetic/share/geometry_msgs/msg/Vector3.msg
+/home/jacob/racer_ws/devel/include/mav_planning_msgs/PlannerService.h: /home/jacob/racer_ws/src/mav_comm/mav_planning_msgs/msg/PolynomialSegment.msg
+/home/jacob/racer_ws/devel/include/mav_planning_msgs/PlannerService.h: /opt/ros/noetic/share/geometry_msgs/msg/Point.msg
+/home/jacob/racer_ws/devel/include/mav_planning_msgs/PlannerService.h: /opt/ros/noetic/share/geometry_msgs/msg/Twist.msg
+/home/jacob/racer_ws/devel/include/mav_planning_msgs/PlannerService.h: /opt/ros/noetic/share/trajectory_msgs/msg/MultiDOFJointTrajectory.msg
+/home/jacob/racer_ws/devel/include/mav_planning_msgs/PlannerService.h: /opt/ros/noetic/share/trajectory_msgs/msg/MultiDOFJointTrajectoryPoint.msg
+/home/jacob/racer_ws/devel/include/mav_planning_msgs/PlannerService.h: /opt/ros/noetic/share/geometry_msgs/msg/PoseStamped.msg
 /home/jacob/racer_ws/devel/include/mav_planning_msgs/PlannerService.h: /home/jacob/racer_ws/src/mav_comm/mav_planning_msgs/msg/PolynomialTrajectory4D.msg
 /home/jacob/racer_ws/devel/include/mav_planning_msgs/PlannerService.h: /opt/ros/noetic/share/geometry_msgs/msg/Pose.msg
 /home/jacob/racer_ws/devel/include/mav_planning_msgs/PlannerService.h: /home/jacob/racer_ws/src/mav_comm/mav_planning_msgs/msg/PolynomialSegment4D.msg
-/home/jacob/racer_ws/devel/include/mav_planning_msgs/PlannerService.h: /opt/ros/noetic/share/geometry_msgs/msg/Point.msg
-/home/jacob/racer_ws/devel/include/mav_planning_msgs/PlannerService.h: /home/jacob/racer_ws/src/mav_comm/mav_planning_msgs/msg/PolynomialSegment.msg
-/home/jacob/racer_ws/devel/include/mav_planning_msgs/PlannerService.h: /opt/ros/noetic/share/geometry_msgs/msg/Twist.msg
-/home/jacob/racer_ws/devel/include/mav_planning_msgs/PlannerService.h: /opt/ros/noetic/share/geometry_msgs/msg/PoseStamped.msg
-/home/jacob/racer_ws/devel/include/mav_planning_msgs/PlannerService.h: /opt/ros/noetic/share/geometry_msgs/msg/Vector3.msg
-/home/jacob/racer_ws/devel/include/mav_planning_msgs/PlannerService.h: /opt/ros/noetic/share/trajectory_msgs/msg/MultiDOFJointTrajectory.msg
 /home/jacob/racer_ws/devel/include/mav_planning_msgs/PlannerService.h: /home/jacob/racer_ws/src/mav_comm/mav_planning_msgs/msg/PolynomialTrajectory.msg
-/home/jacob/racer_ws/devel/include/mav_planning_msgs/PlannerService.h: /opt/ros/noetic/share/geometry_msgs/msg/Quaternion.msg
-/home/jacob/racer_ws/devel/include/mav_planning_msgs/PlannerService.h: /opt/ros/noetic/share/geometry_msgs/msg/Transform.msg
 /home/jacob/racer_ws/devel/include/mav_planning_msgs/PlannerService.h: /opt/ros/noetic/share/gencpp/msg.h.template
 /home/jacob/racer_ws/devel/include/mav_planning_msgs/PlannerService.h: /opt/ros/noetic/share/gencpp/srv.h.template
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/jacob/racer_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Generating C++ code from mav_planning_msgs/PlannerService.srv"
@@ -164,11 +164,11 @@ mav_comm/mav_planning_msgs/CMakeFiles/mav_planning_msgs_generate_messages_cpp: /
 
 /home/jacob/racer_ws/devel/include/mav_planning_msgs/PolygonService.h: /opt/ros/noetic/lib/gencpp/gen_cpp.py
 /home/jacob/racer_ws/devel/include/mav_planning_msgs/PolygonService.h: /home/jacob/racer_ws/src/mav_comm/mav_planning_msgs/srv/PolygonService.srv
+/home/jacob/racer_ws/devel/include/mav_planning_msgs/PolygonService.h: /opt/ros/noetic/share/std_msgs/msg/Header.msg
 /home/jacob/racer_ws/devel/include/mav_planning_msgs/PolygonService.h: /home/jacob/racer_ws/src/mav_comm/mav_planning_msgs/msg/PolygonWithHolesStamped.msg
 /home/jacob/racer_ws/devel/include/mav_planning_msgs/PolygonService.h: /home/jacob/racer_ws/src/mav_comm/mav_planning_msgs/msg/PolygonWithHoles.msg
-/home/jacob/racer_ws/devel/include/mav_planning_msgs/PolygonService.h: /opt/ros/noetic/share/std_msgs/msg/Header.msg
-/home/jacob/racer_ws/devel/include/mav_planning_msgs/PolygonService.h: /home/jacob/racer_ws/src/mav_comm/mav_planning_msgs/msg/Point2D.msg
 /home/jacob/racer_ws/devel/include/mav_planning_msgs/PolygonService.h: /home/jacob/racer_ws/src/mav_comm/mav_planning_msgs/msg/Polygon2D.msg
+/home/jacob/racer_ws/devel/include/mav_planning_msgs/PolygonService.h: /home/jacob/racer_ws/src/mav_comm/mav_planning_msgs/msg/Point2D.msg
 /home/jacob/racer_ws/devel/include/mav_planning_msgs/PolygonService.h: /opt/ros/noetic/share/gencpp/msg.h.template
 /home/jacob/racer_ws/devel/include/mav_planning_msgs/PolygonService.h: /opt/ros/noetic/share/gencpp/srv.h.template
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/jacob/racer_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Generating C++ code from mav_planning_msgs/PolygonService.srv"

@@ -98,3 +98,23 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/exploration_manager" TYPE PROGRAM FILES "/home/jacob/racer_ws/build/RACER/swarm_exploration/exploration_manager/catkin_generated/installspace/world_cloud_publisher.py")
 endif()
 
+if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/exploration_manager" TYPE PROGRAM FILES "/home/jacob/racer_ws/build/RACER/swarm_exploration/exploration_manager/catkin_generated/installspace/odom_tf_broadcaster.py")
+endif()
+
+if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/exploration_manager" TYPE PROGRAM FILES "/home/jacob/racer_ws/build/RACER/swarm_exploration/exploration_manager/catkin_generated/installspace/sensor_pose_from_tf.py")
+endif()
+
+if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/exploration_manager" TYPE PROGRAM FILES "/home/jacob/racer_ws/build/RACER/swarm_exploration/exploration_manager/catkin_generated/installspace/poscmd_to_mav_trajectory.py")
+endif()
+
+if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/exploration_manager" TYPE PROGRAM FILES "/home/jacob/racer_ws/build/RACER/swarm_exploration/exploration_manager/catkin_generated/installspace/takeoff_hover_until_poscmd.py")
+endif()
+
+if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/exploration_manager" TYPE PROGRAM FILES "/home/jacob/racer_ws/build/RACER/swarm_exploration/exploration_manager/catkin_generated/installspace/pointcloud_downsample.py")
+endif()
+

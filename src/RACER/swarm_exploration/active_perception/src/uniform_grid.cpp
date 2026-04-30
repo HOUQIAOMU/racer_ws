@@ -22,6 +22,7 @@ UniformGrid::UniformGrid(
   nh.param("partitioning/min_unknown", min_unknown_, 10000);
   nh.param("partitioning/min_frontier", min_frontier_, 100);
   nh.param("partitioning/min_free", min_free_, 3000);
+  nh.param("exploration/drone_num", drone_num_, 1);
   nh.param("partitioning/consistent_cost", consistent_cost_, 3.5);
   nh.param("partitioning/w_unknown", w_unknown_, 3.5);
 
@@ -226,9 +227,12 @@ void UniformGrid::updateGridData(const int& drone_id, vector<int>& grid_ids, vec
 
   // Update the dominance grid of ego drone
   if (!initialized_) {
-    if (drone_id == 1 && level_ == 1) grid_ids = relevant_id_;
-    // else
-    //   grid_ids = {};
+    if (level_ == 1) {
+      grid_ids.clear();
+      for (int i = 0; i < relevant_id_.size(); ++i) {
+        if (i % max(1, drone_num_) == drone_id - 1) grid_ids.push_back(relevant_id_[i]);
+      }
+    }
     ROS_WARN("Init grid allocation.");
     initialized_ = true;
   } else {

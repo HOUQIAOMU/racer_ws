@@ -108,6 +108,7 @@ struct ExplorationParam {
   string mtsp_dir_;  // resource dir of tsp solver
   double relax_time_;
   int init_plan_num_;
+  bool optimistic_search_;
 
   // Swarm
   int drone_num_;

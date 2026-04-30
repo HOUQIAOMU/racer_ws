@@ -63,6 +63,7 @@ void FastExplorationManager::initialize(ros::NodeHandle& nh) {
   nh.param("exploration/drone_num", ep_->drone_num_, 1);
   nh.param("exploration/drone_id", ep_->drone_id_, 1);
   nh.param("exploration/init_plan_num", ep_->init_plan_num_, 2);
+  nh.param("exploration/optimistic_search", ep_->optimistic_search_, false);
 
   ed_->swarm_state_.resize(ep_->drone_num_);
   ed_->pair_opt_stamps_.resize(ep_->drone_num_);
@@ -311,9 +312,14 @@ int FastExplorationManager::planTrajToView(const Vector3d& pos, const Vector3d& 
   bool goal_unknown = (edt_environment_->sdf_map_->getOccupancy(next_pos) == SDFMap::UNKNOWN);
   // bool start_unknown = (edt_environment_->sdf_map_->getOccupancy(pos) == SDFMap::UNKNOWN);
   bool optimistic = ed_->plan_num_ < ep_->init_plan_num_;
+  bool optimistic_search = optimistic || ep_->optimistic_search_;
   planner_manager_->path_finder_->reset();
-  if (planner_manager_->path_finder_->search(pos, next_pos, optimistic) != Astar::REACH_END) {
-    ROS_ERROR("No path to next viewpoint");
+  if (planner_manager_->path_finder_->search(pos, next_pos, optimistic_search) != Astar::REACH_END) {
+    ROS_ERROR_STREAM("No path to next viewpoint. start=" << pos.transpose()
+                                                         << ", goal=" << next_pos.transpose()
+                                                         << ", optimistic=" << optimistic_search
+                                                         << ", plan_num=" << ed_->plan_num_
+                                                         << ", init_plan_num=" << ep_->init_plan_num_);
     return FAIL;
   }
   ed_->path_next_goal_ = planner_manager_->path_finder_->getPath();

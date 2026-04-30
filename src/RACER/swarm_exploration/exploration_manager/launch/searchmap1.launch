@@ -1,0 +1,125 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="world_name" default="MAP1"/>
+  <arg name="world_file" default="$(find fuae_gazebo)/worlds/$(arg world_name).world"/>
+  <arg name="gui" default="true"/>
+  <arg name="paused" default="false"/>
+  <arg name="verbose" default="true"/>
+  <arg name="drone_num" default="4"/>
+  <arg name="mav_name" default="iris"/>
+  <arg name="map_frame" default="world"/>
+  <arg name="publish_world_cloud" default="true"/>
+  <arg name="launch_rviz" default="true"/>
+  <arg name="start_odom_visualization" default="true"/>
+  <arg name="enable_takeoff_hover" default="true"/>
+  <arg name="takeoff_hover_z" default="1.2"/>
+
+  <arg name="namespace_0" default="uav0"/>
+  <arg name="namespace_1" default="uav1"/>
+  <arg name="namespace_2" default="uav2"/>
+  <arg name="namespace_3" default="uav3"/>
+
+  <arg name="x_0" default="0.0"/>
+  <arg name="y_0" default="0.8"/>
+  <arg name="z_0" default="0.8"/>
+  <arg name="x_1" default="0.4"/>
+  <arg name="y_1" default="-0.5"/>
+  <arg name="z_1" default="0.8"/>
+  <arg name="x_2" default="0.0"/>
+  <arg name="y_2" default="1.4"/>
+  <arg name="z_2" default="0.8"/>
+  <arg name="x_3" default="1.4"/>
+  <arg name="y_3" default="-0.2"/>
+  <arg name="z_3" default="0.8"/>
+
+  <arg name="spawn_delay_0" default="0.0"/>
+  <arg name="spawn_delay_1" default="3.0"/>
+  <arg name="spawn_delay_2" default="6.0"/>
+  <arg name="spawn_delay_3" default="9.0"/>
+  <arg name="unpause_delay" default="12.0"/>
+
+  <param name="use_sim_time" value="true"/>
+
+  <include file="$(find exploration_manager)/launch/env_simulation.launch">
+    <arg name="world_name" value="$(arg world_name)"/>
+    <arg name="gui" value="$(arg gui)"/>
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="verbose" value="$(arg verbose)"/>
+  </include>
+
+  <node if="$(arg publish_world_cloud)"
+        pkg="exploration_manager"
+        name="map1_world_cloud"
+        type="world_cloud_publisher.py"
+        output="screen">
+    <param name="world_file" value="$(arg world_file)"/>
+    <param name="topic" value="/map_generator/global_cloud"/>
+    <param name="frame_id" value="$(arg map_frame)"/>
+    <param name="resolution" value="0.15"/>
+    <param name="include_ground" value="false"/>
+  </node>
+
+  <include file="$(find exploration_manager)/launch/uav_racer_simulation.launch">
+    <arg name="namespace" value="$(arg namespace_0)"/>
+    <arg name="drone_id" value="1"/>
+    <arg name="drone_num" value="$(arg drone_num)"/>
+    <arg name="mav_name" value="$(arg mav_name)"/>
+    <arg name="x" value="$(arg x_0)"/>
+    <arg name="y" value="$(arg y_0)"/>
+    <arg name="z" value="$(arg z_0)"/>
+    <arg name="map_frame" value="$(arg map_frame)"/>
+    <arg name="start_odom_visualization" value="$(arg start_odom_visualization)"/>
+    <arg name="enable_takeoff_hover" value="$(arg enable_takeoff_hover)"/>
+    <arg name="takeoff_hover_z" value="$(arg takeoff_hover_z)"/>
+    <arg name="unpause" value="true"/>
+    <arg name="spawn_delay" value="$(arg spawn_delay_0)"/>
+    <arg name="unpause_delay" value="$(arg unpause_delay)"/>
+  </include>
+
+  <include file="$(find exploration_manager)/launch/uav_racer_simulation.launch" if="$(eval int(arg('drone_num')) >= 2)">
+    <arg name="namespace" value="$(arg namespace_1)"/>
+    <arg name="drone_id" value="2"/>
+    <arg name="drone_num" value="$(arg drone_num)"/>
+    <arg name="mav_name" value="$(arg mav_name)"/>
+    <arg name="x" value="$(arg x_1)"/>
+    <arg name="y" value="$(arg y_1)"/>
+    <arg name="z" value="$(arg z_1)"/>
+    <arg name="map_frame" value="$(arg map_frame)"/>
+    <arg name="start_odom_visualization" value="$(arg start_odom_visualization)"/>
+    <arg name="enable_takeoff_hover" value="$(arg enable_takeoff_hover)"/>
+    <arg name="takeoff_hover_z" value="$(arg takeoff_hover_z)"/>
+    <arg name="spawn_delay" value="$(arg spawn_delay_1)"/>
+  </include>
+
+  <include file="$(find exploration_manager)/launch/uav_racer_simulation.launch" if="$(eval int(arg('drone_num')) >= 3)">
+    <arg name="namespace" value="$(arg namespace_2)"/>
+    <arg name="drone_id" value="3"/>
+    <arg name="drone_num" value="$(arg drone_num)"/>
+    <arg name="mav_name" value="$(arg mav_name)"/>
+    <arg name="x" value="$(arg x_2)"/>
+    <arg name="y" value="$(arg y_2)"/>
+    <arg name="z" value="$(arg z_2)"/>
+    <arg name="map_frame" value="$(arg map_frame)"/>
+    <arg name="start_odom_visualization" value="$(arg start_odom_visualization)"/>
+    <arg name="enable_takeoff_hover" value="$(arg enable_takeoff_hover)"/>
+    <arg name="takeoff_hover_z" value="$(arg takeoff_hover_z)"/>
+    <arg name="spawn_delay" value="$(arg spawn_delay_2)"/>
+  </include>
+
+  <include file="$(find exploration_manager)/launch/uav_racer_simulation.launch" if="$(eval int(arg('drone_num')) >= 4)">
+    <arg name="namespace" value="$(arg namespace_3)"/>
+    <arg name="drone_id" value="4"/>
+    <arg name="drone_num" value="$(arg drone_num)"/>
+    <arg name="mav_name" value="$(arg mav_name)"/>
+    <arg name="x" value="$(arg x_3)"/>
+    <arg name="y" value="$(arg y_3)"/>
+    <arg name="z" value="$(arg z_3)"/>
+    <arg name="map_frame" value="$(arg map_frame)"/>
+    <arg name="start_odom_visualization" value="$(arg start_odom_visualization)"/>
+    <arg name="enable_takeoff_hover" value="$(arg enable_takeoff_hover)"/>
+    <arg name="takeoff_hover_z" value="$(arg takeoff_hover_z)"/>
+    <arg name="spawn_delay" value="$(arg spawn_delay_3)"/>
+  </include>
+
+  <include if="$(arg launch_rviz)" file="$(find exploration_manager)/launch/rviz.launch"/>
+</launch>
