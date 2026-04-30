@@ -19,6 +19,15 @@
   <arg name="simulation" default="true"/>
   <arg name="single_expo" default="false"/>
   <arg name="map_frame" default="world"/>
+  <!-- Gazebo profile tuning knobs -->
+  <arg name="sdf_obstacles_inflation" default="0.4"/>
+  <arg name="frontier_cluster_min" default="60"/>
+  <arg name="frontier_min_candidate_clearance" default="0.2"/>
+  <arg name="frontier_candidate_rmax" default="1.5"/>
+  <arg name="frontier_min_visib_num" default="10"/>
+  <arg name="manager_clearance_threshold" default="0.25"/>
+  <arg name="swarm_safe_dist" default="1.0"/>
+  <arg name="astar_max_search_time" default="0.02"/>
 
   <!-- main node -->
   <node pkg="exploration_manager" name="exploration_node_$(arg drone_id)" type="exploration_node" output="log">
@@ -63,7 +72,7 @@
     <param name="sdf_map/map_size_x"   value="$(arg map_size_x)" /> 
     <param name="sdf_map/map_size_y"   value="$(arg map_size_y)" /> 
     <param name="sdf_map/map_size_z"   value="$(arg map_size_z)" /> 
-    <param name="sdf_map/obstacles_inflation"     value="0.4" />
+    <param name="sdf_map/obstacles_inflation"     value="$(arg sdf_obstacles_inflation)" />
     <!-- <param name="sdf_map/obstacles_inflation"     value="0.0" />  -->
     <param name="sdf_map/local_bound_inflate"    value="0.5"/>
     <param name="sdf_map/local_map_margin" value="50"/>
@@ -155,17 +164,17 @@
     <param name="exploration/init_plan_num" value="2" type="int"/>
     <param name="exploration/optimistic_search" value="true" type="bool"/>
 
-    <param name="frontier/cluster_min" value="100" type="int"/>
+    <param name="frontier/cluster_min" value="$(arg frontier_cluster_min)" type="int"/>
     <param name="frontier/cluster_size_xy" value="2.0" type="double"/>
     <param name="frontier/cluster_size_z" value="10.0" type="double"/>
     <param name="frontier/min_candidate_dist" value="0.5" type="double"/>
-    <param name="frontier/min_candidate_clearance" value="0.4" type="double"/>
+    <param name="frontier/min_candidate_clearance" value="$(arg frontier_min_candidate_clearance)" type="double"/>
     <param name="frontier/candidate_dphi" value="$(eval 15 * 3.1415926 / 180.0)" type="double"/>
     <param name="frontier/candidate_rnum" value="3" type="int"/>
     <param name="frontier/candidate_rmin" value="1.0" type="double"/>
-    <param name="frontier/candidate_rmax" value="1.5" type="double"/>
+    <param name="frontier/candidate_rmax" value="$(arg frontier_candidate_rmax)" type="double"/>
     <param name="frontier/down_sample" value="3" type="int"/>;
-    <param name="frontier/min_visib_num" value="30" type="int"/>;
+    <param name="frontier/min_visib_num" value="$(arg frontier_min_visib_num)" type="int"/>;
     <param name="frontier/min_view_finish_fraction" value="0.2" type="double"/>;
 
 
@@ -192,7 +201,7 @@
     <param name="manager/max_jerk" value="4" type="double"/>
     <param name="manager/dynamic_environment" value="0" type="int"/>
     <param name="manager/local_segment_length" value="6.0" type="double"/>
-    <param name="manager/clearance_threshold" value="0.4" type="double"/>
+    <param name="manager/clearance_threshold" value="$(arg manager_clearance_threshold)" type="double"/>
     <param name="manager/control_points_distance" value="0.5" type="double"/>
     <param name="manager/use_geometric_path" value="true" type="bool"/>
     <param name="manager/use_kinodynamic_path" value="true" type="bool"/>
@@ -223,7 +232,7 @@
     <param name="astar/lambda_heu" value="10000.0" type="double"/>
     <param name="astar/resolution_astar" value="0.3" type="double"/>
     <param name="astar/allocate_num" value="1000000" type="int"/>
-    <param name="astar/max_search_time" value="0.02" type="double"/>
+    <param name="astar/max_search_time" value="$(arg astar_max_search_time)" type="double"/>
 
   <!-- trajectory optimization -->
     <param name="optimization/ld_smooth" value="5.0" type="double"/>
@@ -236,7 +245,7 @@
     <param name="optimization/ld_view" value="0.0" type="double"/>
     <param name="optimization/ld_time" value="1.5" type="double"/>
     <param name="optimization/ld_swarm" value="5.0" type="double"/>
-    <param name="optimization/swarm_safe_dist" value="1.0" type="double"/>
+    <param name="optimization/swarm_safe_dist" value="$(arg swarm_safe_dist)" type="double"/>
     <param name="optimization/dist0" value="0.7" type="double"/>
     <param name="optimization/max_vel" value="$(arg max_vel)" type="double"/>
     <param name="optimization/max_acc" value="$(arg max_acc)" type="double"/>

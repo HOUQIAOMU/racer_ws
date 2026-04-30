@@ -22,6 +22,15 @@
     <arg name="cy" default="239.10362243652344"/>
     <arg name="fx" default="385.69793701171875"/>
     <arg name="fy" default="385.69793701171875"/>
+    <!-- Gazebo profile tuning knobs -->
+    <arg name="sdf_obstacles_inflation" default="0.4"/>
+    <arg name="frontier_cluster_min" default="60"/>
+    <arg name="frontier_min_candidate_clearance" default="0.2"/>
+    <arg name="frontier_candidate_rmax" default="1.5"/>
+    <arg name="frontier_min_visib_num" default="10"/>
+    <arg name="manager_clearance_threshold" default="0.25"/>
+    <arg name="swarm_safe_dist" default="1.0"/>
+    <arg name="astar_max_search_time" default="0.02"/>
 
 
   <!-- main algorithm params -->
@@ -57,6 +66,14 @@
     <arg name="max_acc" value="0.8" /> -->
     <arg name="simulation" value="$(arg simulation)" />
     <arg name="map_frame" value="$(arg map_frame)" />
+    <arg name="sdf_obstacles_inflation" value="$(arg sdf_obstacles_inflation)" />
+    <arg name="frontier_cluster_min" value="$(arg frontier_cluster_min)" />
+    <arg name="frontier_min_candidate_clearance" value="$(arg frontier_min_candidate_clearance)" />
+    <arg name="frontier_candidate_rmax" value="$(arg frontier_candidate_rmax)" />
+    <arg name="frontier_min_visib_num" value="$(arg frontier_min_visib_num)" />
+    <arg name="manager_clearance_threshold" value="$(arg manager_clearance_threshold)" />
+    <arg name="swarm_safe_dist" value="$(arg swarm_safe_dist)" />
+    <arg name="astar_max_search_time" value="$(arg astar_max_search_time)" />
   </include>
 
   <!-- trajectory server -->

@@ -29,10 +29,19 @@
   <arg name="unpause_delay" default="0.0"/>
   <arg name="enable_racer" default="true"/>
   <arg name="enable_control_bridge" default="true"/>
-  <arg name="cloud_downsample_stride" default="60"/>
-  <arg name="cloud_downsample_max_points" default="5000"/>
-  <arg name="max_vel" default="1.0"/>
-  <arg name="max_acc" default="0.8"/>
+  <arg name="cloud_downsample_stride" default="15"/>
+  <arg name="cloud_downsample_max_points" default="20000"/>
+  <arg name="max_vel" default="0.8"/>
+  <arg name="max_acc" default="0.6"/>
+  <!-- Dedicated Gazebo exploration profile -->
+  <arg name="gazebo_sdf_obstacles_inflation" default="0.30"/>
+  <arg name="gazebo_frontier_cluster_min" default="70"/>
+  <arg name="gazebo_frontier_min_candidate_clearance" default="0.25"/>
+  <arg name="gazebo_frontier_candidate_rmax" default="2.0"/>
+  <arg name="gazebo_frontier_min_visib_num" default="8"/>
+  <arg name="gazebo_manager_clearance_threshold" default="0.30"/>
+  <arg name="gazebo_swarm_safe_dist" default="1.4"/>
+  <arg name="gazebo_astar_max_search_time" default="0.05"/>
 
   <include file="$(find exploration_manager)/launch/uav_simulation.launch">
     <arg name="mav_name" value="$(arg mav_name)"/>
@@ -146,6 +155,14 @@
       <arg name="cy" value="$(arg cy)"/>
       <arg name="fx" value="$(arg fx)"/>
       <arg name="fy" value="$(arg fy)"/>
+      <arg name="sdf_obstacles_inflation" value="$(arg gazebo_sdf_obstacles_inflation)"/>
+      <arg name="frontier_cluster_min" value="$(arg gazebo_frontier_cluster_min)"/>
+      <arg name="frontier_min_candidate_clearance" value="$(arg gazebo_frontier_min_candidate_clearance)"/>
+      <arg name="frontier_candidate_rmax" value="$(arg gazebo_frontier_candidate_rmax)"/>
+      <arg name="frontier_min_visib_num" value="$(arg gazebo_frontier_min_visib_num)"/>
+      <arg name="manager_clearance_threshold" value="$(arg gazebo_manager_clearance_threshold)"/>
+      <arg name="swarm_safe_dist" value="$(arg gazebo_swarm_safe_dist)"/>
+      <arg name="astar_max_search_time" value="$(arg gazebo_astar_max_search_time)"/>
     </include>
 
     <node if="$(arg enable_control_bridge)"
