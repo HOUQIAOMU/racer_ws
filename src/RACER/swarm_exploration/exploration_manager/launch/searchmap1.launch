@@ -6,7 +6,7 @@
   <arg name="paused" default="false"/>
   <arg name="verbose" default="true"/>
   <arg name="drone_num" default="4"/>
-  <arg name="mav_name" default="iris"/>
+  <arg name="mav_name" default="ardrone"/>
   <arg name="map_frame" default="world"/>
   <arg name="publish_world_cloud" default="true"/>
   <arg name="launch_rviz" default="true"/>

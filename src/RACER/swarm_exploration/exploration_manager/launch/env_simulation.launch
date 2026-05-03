@@ -15,6 +15,9 @@
        value="$(optenv GAZEBO_MODEL_PATH):$(find rotors_gazebo)/models:$(find fuae_gazebo)"/>
   <env name="GAZEBO_RESOURCE_PATH"
        value="$(optenv GAZEBO_RESOURCE_PATH):$(find rotors_gazebo)/models:$(find fuae_gazebo)"/>
+  <!-- Make librealsense_gazebo_plugin.so (built in star-searcher devel) discoverable. -->
+  <env name="GAZEBO_PLUGIN_PATH"
+       value="$(optenv GAZEBO_PLUGIN_PATH):$(env HOME)/star-searcher/devel/lib"/>
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(arg world_file)"/>

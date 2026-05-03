@@ -3,7 +3,7 @@
   <arg name="namespace"/>
   <arg name="drone_id"/>
   <arg name="drone_num" default="4"/>
-  <arg name="mav_name" default="iris"/>
+  <arg name="mav_name" default="ardrone"/>
 
   <arg name="x" default="0.0"/>
   <arg name="y" default="0.0"/>
@@ -69,24 +69,12 @@
         args="/$(arg namespace)/ground_truth/odometry /$(arg namespace)/odom"
         output="log"/>
 
-  <node name="$(arg namespace)_depth_points_relay"
-        pkg="topic_tools"
-        type="relay"
-        args="/$(arg namespace)/camera_depth/depth/points /$(arg namespace)/depth/points"
-        output="log"/>
-
-  <node name="$(arg namespace)_depth_disparity_relay"
-        pkg="topic_tools"
-        type="relay"
-        args="/$(arg namespace)/camera_depth/depth/disparity /$(arg namespace)/depth/disparity"
-        output="log"/>
-
-  <node name="$(arg namespace)_pointcloud_downsample"
+  <node name="$(arg namespace)_lidar_cloud_to_world"
         pkg="exploration_manager"
         type="pointcloud_downsample.py"
         output="screen">
-    <param name="input_topic" value="/$(arg namespace)/depth/points"/>
-    <param name="output_topic" value="/$(arg namespace)/depth/points_world"/>
+    <param name="input_topic" value="/$(arg namespace)/velodyne_points"/>
+    <param name="output_topic" value="/$(arg namespace)/cloud_world"/>
     <param name="target_frame" value="$(arg map_frame)"/>
     <param name="stride" value="$(arg cloud_downsample_stride)"/>
     <param name="max_points" value="$(arg cloud_downsample_max_points)"/>
@@ -97,24 +85,24 @@
         type="static_transform_publisher"
         args="0 0 0 0 0 0 $(arg map_frame) $(arg namespace)/odom 100"/>
 
-  <group ns="$(arg namespace)">
-    <node name="odom_tf_broadcaster"
-          pkg="exploration_manager"
-          type="odom_tf_broadcaster.py"
-          output="screen">
-      <param name="odom_topic" value="/$(arg namespace)/odom"/>
-      <param name="parent_frame" value="$(arg namespace)/odom"/>
-      <param name="child_frame" value="$(arg namespace)/base_link"/>
-    </node>
+  <!-- Bridge gazebo-odometry TF tree (uav0/base_link) with robot_state_publisher
+       URDF tree (uav0/uav0/base_link). RSP applies tf_prefix=uav0 on top of URDF
+       link names that already contain the uav0/ prefix, producing a separate
+       double-prefixed subtree that is otherwise disconnected from world. -->
+  <node name="$(arg namespace)_baselink_bridge_tf"
+        pkg="tf"
+        type="static_transform_publisher"
+        args="0 0 0 0 0 0 $(arg namespace)/base_link $(arg namespace)/$(arg namespace)/base_link 100"/>
 
+  <group ns="$(arg namespace)">
     <node name="sensor_pose_from_tf"
           pkg="exploration_manager"
           type="sensor_pose_from_tf.py"
           output="screen">
       <param name="map_frame" value="$(arg map_frame)"/>
-      <param name="sensor_frame" value="$(arg namespace)/camera_depth_optical_center_link"/>
+      <param name="sensor_frame" value="$(arg namespace)/camera_depth_optical_frame"/>
       <param name="pose_topic" value="sensor_pose"/>
-      <param name="reference_topic" value="/$(arg namespace)/depth/points_world"/>
+      <param name="reference_topic" value="/$(arg namespace)/cloud_world"/>
       <param name="publish_rate" value="30.0"/>
     </node>
 
@@ -146,7 +134,7 @@
       <arg name="odometry_topic" value="/$(arg namespace)/odom"/>
       <arg name="sensor_pose_topic" value="/$(arg namespace)/sensor_pose"/>
       <arg name="depth_topic" value="/$(arg namespace)/depth/disabled"/>
-      <arg name="cloud_topic" value="/$(arg namespace)/depth/points_world"/>
+      <arg name="cloud_topic" value="/$(arg namespace)/cloud_world"/>
       <arg name="position_cmd_topic" value="planning/pos_cmd"/>
       <arg name="map_frame" value="$(arg map_frame)"/>
       <arg name="max_vel" value="$(arg max_vel)"/>

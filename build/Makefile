@@ -5069,6 +5069,45 @@ map_msgs_generate_messages_nodejs/fast:
 .PHONY : map_msgs_generate_messages_nodejs/fast
 
 #=============================================================================
+# Target rules for targets named gazebo_ros_velodyne_gpu_laser
+
+# Build rule for target.
+gazebo_ros_velodyne_gpu_laser: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 gazebo_ros_velodyne_gpu_laser
+.PHONY : gazebo_ros_velodyne_gpu_laser
+
+# fast build rule for target.
+gazebo_ros_velodyne_gpu_laser/fast:
+	$(MAKE) -f RACER/swarm_exploration/velodyne_simulator/velodyne_gazebo_plugins/CMakeFiles/gazebo_ros_velodyne_gpu_laser.dir/build.make RACER/swarm_exploration/velodyne_simulator/velodyne_gazebo_plugins/CMakeFiles/gazebo_ros_velodyne_gpu_laser.dir/build
+.PHONY : gazebo_ros_velodyne_gpu_laser/fast
+
+#=============================================================================
+# Target rules for targets named gazebo_ros_velodyne_laser
+
+# Build rule for target.
+gazebo_ros_velodyne_laser: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 gazebo_ros_velodyne_laser
+.PHONY : gazebo_ros_velodyne_laser
+
+# fast build rule for target.
+gazebo_ros_velodyne_laser/fast:
+	$(MAKE) -f RACER/swarm_exploration/velodyne_simulator/velodyne_gazebo_plugins/CMakeFiles/gazebo_ros_velodyne_laser.dir/build.make RACER/swarm_exploration/velodyne_simulator/velodyne_gazebo_plugins/CMakeFiles/gazebo_ros_velodyne_laser.dir/build
+.PHONY : gazebo_ros_velodyne_laser/fast
+
+#=============================================================================
+# Target rules for targets named gazebo_ros_gencfg
+
+# Build rule for target.
+gazebo_ros_gencfg: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 gazebo_ros_gencfg
+.PHONY : gazebo_ros_gencfg
+
+# fast build rule for target.
+gazebo_ros_gencfg/fast:
+	$(MAKE) -f RACER/swarm_exploration/velodyne_simulator/velodyne_gazebo_plugins/CMakeFiles/gazebo_ros_gencfg.dir/build.make RACER/swarm_exploration/velodyne_simulator/velodyne_gazebo_plugins/CMakeFiles/gazebo_ros_gencfg.dir/build
+.PHONY : gazebo_ros_gencfg/fast
+
+#=============================================================================
 # Target rules for targets named waypoint_generator
 
 # Build rule for target.
@@ -5523,6 +5562,9 @@ help:
 	@echo "... map_msgs_generate_messages_py"
 	@echo "... map_msgs_generate_messages_eus"
 	@echo "... map_msgs_generate_messages_nodejs"
+	@echo "... gazebo_ros_velodyne_gpu_laser"
+	@echo "... gazebo_ros_velodyne_laser"
+	@echo "... gazebo_ros_gencfg"
 	@echo "... waypoint_generator"
 	@echo "... hovering_example"
 	@echo "... waypoint_publisher_file"

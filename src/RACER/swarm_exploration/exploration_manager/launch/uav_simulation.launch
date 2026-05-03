@@ -10,11 +10,11 @@
     roslaunch exploration_manager uav_simulation.launch start_hover:=false
 -->
 <launch>
-  <arg name="mav_name"  default="iris"/>
+  <arg name="mav_name"  default="ardrone"/>
   <arg name="namespace" default="$(arg mav_name)"/>
   <arg name="drone_id"  default="1"/>
   <arg name="drone_num" default="1"/>
-  <arg name="model"     default="$(find rotors_gazebo)/models/rotors_description/urdf/$(arg mav_name)_base.xacro"/>
+  <arg name="model"     default="$(find fuae_gazebo)/urdf/bounce_mav.gazebo"/>
 
   <!-- MAP1 has a wall at the origin, so spawn in a free area near the map corner. -->
   <arg name="x"     default="-9.0"/>
@@ -29,8 +29,8 @@
 
   <!--
     Topic the Lee controller subscribes to for state feedback.
-    The Phase 1 iris xacro publishes ground-truth odometry here; other MAVs
-    can override this arg if they mount odometry_sensor1/odometry.
+    bounce_mav.gazebo (mav_name=ardrone) publishes ground-truth odometry
+    via the ground_truth_imu_and_odometry macro from component_snippets.xacro.
   -->
   <arg name="odometry_topic"   default="ground_truth/odometry"/>
 
